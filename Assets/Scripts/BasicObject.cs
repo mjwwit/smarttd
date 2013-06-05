@@ -60,17 +60,7 @@ public class BasicObject : MonoBehaviour
 	// Returns the distance if in range, -1 otherwise.
 	public float IsInRange(BasicObject toObj)
 	{
-		// determine distance between objects
-		float distance = DistanceTo(toObj);
-		
-		// correct for size of target objects
-		distance -= toObj.Radius;
-		
-		// check if the object is in range or not
-		// distance can be negative with object size correction if objects are inside eachother 
-		if( this.RangeOfView >= distance )
-			return Mathf.Max(0, distance);
-		else return -1;
+		return IsInRange(this, toObj);
 	}
 	
 	// Returns the distance if in range, -1 otherwise.
