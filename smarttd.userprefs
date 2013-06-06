@@ -5,19 +5,13 @@
       <File FileName="Assets\Scripts\Tower.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Unit.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\BasicObject.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Path Planning\HexMap.cs" Line="11" Column="2" />
+      <File FileName="Assets\Scripts\Path Planning\HexMap.cs" Line="29" Column="17" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
-        <State expanded="True">
+        <State expanded="True" selected="True">
           <Node name="Assembly-CSharp" expanded="True">
-            <Node name="Assets" expanded="True">
-              <Node name="Scripts" expanded="True">
-                <Node name="Path Planning" expanded="True">
-                  <Node name="HexMap.cs" selected="True" />
-                </Node>
-              </Node>
-            </Node>
+            <Node name="References" expanded="True" />
           </Node>
         </State>
       </Pad>

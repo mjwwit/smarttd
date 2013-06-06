@@ -25,8 +25,8 @@ public class HexMap
 		root.y = rootY;
 		
 		// calculate hexagon height from given width
-		// NodeHeight = 0.5 * NodeWidth * ( 2*tan(PI/6) + tan(PI/3) ) = 5/6 * sqrt(3) * NodeWidth
-		NodeHeight = 5/6f * Mathf.Sqrt(3) * NodeWidth;
+		// NodeHeight = 0.5 * NodeWidth * ( tan(PI/6) + tan(PI/3) ) = 4/6 * sqrt(3) * NodeWidth
+		NodeHeight = 4/6f * Mathf.Sqrt(3) * NodeWidth;
 	}
 	
 	public Vector2 GetNodePosition(NodeIndex index) 
