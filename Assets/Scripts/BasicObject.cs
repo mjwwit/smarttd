@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 // Our basic object, implents basic variables and functionality every object could use.
@@ -57,13 +58,17 @@ public class BasicObject : MonoBehaviour
 		return Vector3.Distance(fromObj.transform.position, toObj.transform.position);
 	}
 	
-	// Returns the distance if in range, -1 otherwise.
+	/// <summary>
+	/// Returns the distance if in range, -1 otherwise.
+	/// </summary>
 	public float IsInRange(BasicObject toObj)
 	{
 		return IsInRange(this, toObj);
 	}
 	
-	// Returns the distance if in range, -1 otherwise.
+	/// <summary>
+	/// Returns the distance if in range, -1 otherwise.
+	/// </summary>
 	public static float IsInRange(BasicObject fromObj, BasicObject toObj)
 	{
 		// determine distance between objects
@@ -105,33 +110,91 @@ public class BasicObject : MonoBehaviour
 	
 	public static BasicObject FindClosestAttackerInRange( BasicObject obj )
 	{
-		BasicObject closestAttacker = null;
-		float closestAttackerDistance = float.MaxValue;
-		
-		foreach( BasicObject attackerObject in Attacker.Objects )
-		{
-			float distance = IsInRange(obj, attackerObject);
-			
-			// store if within range and closer than the current closest
-			if( distance >= 0 && distance < closestAttackerDistance )
-				closestAttacker = attackerObject;
-		}
-		return closestAttacker;
+		return FindClosestInRange<BasicObject>(obj, Attacker.Objects);
 	}
 	public static BasicObject FindClosestDefenderInRange( BasicObject obj )
 	{
-		BasicObject closestDefender = null;
-		float closestDefenderDistance = float.MaxValue;
+		return FindClosestInRange<BasicObject>(obj, Defender.Objects);
+	}
+	public static T FindClosestInRange<T>( BasicObject obj, List<T> objects ) where T : BasicObject
+	{
+		T closestObject = null;
+		float closestObjectDistance = float.MaxValue;
 		
-		foreach( BasicObject defenderObject in Defender.Objects )
+		float distance;
+		
+		foreach( T targetObj in objects )
 		{
-			float distance = IsInRange(obj, defenderObject);
+			distance = IsInRange(obj, targetObj);
 			
 			// store if within range and closer than the current closest
-			if( distance >= 0 && distance < closestDefenderDistance )
-				closestDefender = defenderObject;
+			if( distance >= 0 && distance < closestObjectDistance )
+			{
+				closestObject = targetObj;
+				closestObjectDistance = distance;
+			}
 		}
-		return closestDefender;
+		return closestObject;
+	}
+	
+	
+	/// <summary>
+	/// For every object in objects, first checks if the object is in range of fromObj, 
+	///  then checks if the criterion is satisfied better than the previously found best.
+	/// </summary>
+	public static T FindBestSuitedObjectInRange<T>( 
+			BasicObject fromObj, 
+			List<T> objects,
+			Func<BasicObject, float> criterion
+		) where T : BasicObject
+	{
+		T bestSuitedObject = null;
+		float lowestCriterionValue = float.MaxValue; // the 'distance' in criterion space
+		
+		foreach( T obj in objects )
+		{
+			// don't check against ourselves
+			if(obj == fromObj) continue;
+			
+			// if not within range, skip
+			if(IsInRange(fromObj, obj) < 0) continue;
+			
+			// calculate criterion value
+			float criterionValue = criterion(obj);
+			
+			// keep if a lower criterion value
+			if( criterionValue < lowestCriterionValue )
+			{
+				bestSuitedObject = obj;
+				lowestCriterionValue = criterionValue;
+			}
+		}
+		return bestSuitedObject;
+	}
+	
+	/// <summary>
+	/// Criterion function delegate. The output float of this function should behave like a distance function.
+	///  The closer it is to fulfilling the criterion, the smaller the value.
+	/// </summary>
+	public delegate bool Criterion( BasicObject obj );
+	
+	// A naïve and simple check to see how close the object is to the attacker's goal.
+	public static float Criterion_DistanceToGoal(BasicObject obj)
+	{
+		// Project the object's position on the direction, bigger means it's closer to the goal.
+		float projectedDistance = Vector3.Dot(obj.transform.position, Attacker.GoalDirection);
+		
+		// Times -1, to make sure the end result is smaller for objects closer to the goal.
+		return -projectedDistance;
+	}
+	
+	public static float Criterion_LowHP(BasicObject obj)
+	{
+		return obj.HP;
+	}
+	public static float Criterion_HighHP(BasicObject obj)
+	{
+		return -obj.HP;
 	}
 	
 	#endregion

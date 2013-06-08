@@ -4,6 +4,8 @@ using System.Collections.Generic;
 // Static, for ease of programming. Not going to bother with fancy structures! Practicality is our friend.
 public static class Attacker
 {
+	public static Vector3 GoalDirection = (new Vector3(1, 0, 0)).normalized;
+	
 	public static List<BasicObject> Objects;
 	public static List<Unit> Units;
 	

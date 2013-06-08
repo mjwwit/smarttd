@@ -48,8 +48,12 @@ public class Tower : BasicObject
 	
 	void AcquireTarget()
 	{
-		// target the closest!
-		CurrentTarget = FindClosestAttackerInRange(this);
+		// target the unit closest to the goal
+		CurrentTarget = FindBestSuitedObjectInRange<Unit>(
+			this, 
+			Attacker.Units,
+			Criterion_DistanceToGoal
+		);
 		
 		// reset attack timer on acquiring a new target
 		nextAttackTime = Time.time + AttackCooldown;
