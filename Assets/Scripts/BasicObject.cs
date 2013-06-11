@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 // Our basic object, implents basic variables and functionality every object could use.
@@ -36,6 +37,7 @@ public class BasicObject : MonoBehaviour
 	
 	public virtual void TakeDamage(int damage)
 	{
+		Blink(Color.red);
 		HP -= damage;
 		if(HP <= 0)
 			Die();
@@ -197,5 +199,19 @@ public class BasicObject : MonoBehaviour
 		return -obj.HP;
 	}
 	
+	//Visualisation
+	public void Blink(Color col)
+	{
+		StartCoroutine(blink(col));
+	}
+	WaitForSeconds wait = new WaitForSeconds(0.1f);
+	IEnumerator blink(Color col)
+	{
+		this.GetComponentInChildren<Renderer>().material.color=col;
+		
+		yield return wait;
+		
+		this.GetComponentInChildren<Renderer>().material.color=Color.white;
+	}
 	#endregion
 }
