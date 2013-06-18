@@ -8,11 +8,15 @@ public class Tower : BasicObject
 	public int Damage = 1;
 	public float AttackCooldown = 2;
 	
-	float nextAttackTime = 0;
+	float nextAttackCooldown = 0;
+	
+	Transform gun;
 	
 	protected override void Start ()
 	{
 		base.Start ();
+		
+		gun = transform.FindChild("GunPosition");
 	}
 	protected override void Update ()
 	{
@@ -21,21 +25,33 @@ public class Tower : BasicObject
 			|| DistanceTo(CurrentTarget) > RangeOfView
 			|| !CurrentTarget.IsAlive)
 		{
+			CurrentTarget = null;
 			AcquireTarget();
 		}
 		else
 		{
-			if(Time.time >= nextAttackTime)
+			nextAttackCooldown -= Time.deltaTime;
+			
+			// cooldown & fire
+			if(nextAttackCooldown <= 0)
 			{
-				nextAttackTime += AttackCooldown;
+				nextAttackCooldown = AttackCooldown;
 				
 				Fire();
-				
-				if( !CurrentTarget.IsAlive )
-				{
-					AcquireTarget();
-				}
 			}
+			
+			// targeting visualization
+			float cdRatio = nextAttackCooldown / AttackCooldown;
+			
+			Debug.DrawLine(
+				gun.position, 
+				CurrentTarget.transform.position, 
+				new Color(
+					cdRatio > .5f ? 2-cdRatio*2 : 1, 
+					cdRatio > .5f ? 1 : cdRatio*2, 
+					0
+				)
+			);
 		}
 		base.Update ();
 	}
@@ -56,7 +72,7 @@ public class Tower : BasicObject
 		);
 		
 		// reset attack timer on acquiring a new target
-		nextAttackTime = Time.time + AttackCooldown;
+		nextAttackCooldown = AttackCooldown;
 	}
 	
 	public override void Die ()
