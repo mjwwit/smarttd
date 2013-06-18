@@ -14,11 +14,29 @@ public class BasicObject : MonoBehaviour
 	// how large the object is
 	// -> should we take this into account when deciding whether targets are in range or not?
 	// -> for both or only the target?
+	// for simplicity, I think we should not
 	public float Radius = 0.5f;
 	
-	public int HP = 1;
+	public int MaxHP = 1;
 	
+	[HideInInspector]
+	public int HP;
+	
+	[HideInInspector]
 	public bool IsAlive = true;
+	
+	// world units per second
+	public float MovementSpeed = 0;
+	
+	#endregion
+	
+	#region Private Properties
+	
+	// caching these is efficient, because the get and set under the hood is a bit slow when used extensively
+	// don't worry about it until performance is poor though ;)
+	new Transform transform;
+	new Renderer renderer;
+	Material material;
 	
 	#endregion
 	
@@ -26,7 +44,11 @@ public class BasicObject : MonoBehaviour
 	// Use this for initialization
 	protected virtual void Start ()
 	{
-	
+		transform = this.GetComponent<Transform>();
+		renderer = this.GetComponentInChildren<Renderer>();
+		material = renderer.material;
+		
+		HP = MaxHP;
 	}
 	
 	// Update is called once per frame
@@ -77,7 +99,7 @@ public class BasicObject : MonoBehaviour
 		float distance = Distance(fromObj, toObj);
 		
 		// correct for size of target objects
-		distance -= toObj.Radius;
+		// distance -= toObj.Radius;
 		
 		// check if the object is in range or not
 		// distance can be negative with object size correction if objects are inside eachother 
@@ -207,11 +229,11 @@ public class BasicObject : MonoBehaviour
 	WaitForSeconds wait = new WaitForSeconds(0.1f);
 	IEnumerator blink(Color col)
 	{
-		this.GetComponentInChildren<Renderer>().material.color=col;
+		material.color=col;
 		
 		yield return wait;
 		
-		this.GetComponentInChildren<Renderer>().material.color=Color.white;
+		material.color=Color.white;
 	}
 	#endregion
 }

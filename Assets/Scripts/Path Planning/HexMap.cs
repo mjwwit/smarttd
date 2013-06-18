@@ -26,6 +26,7 @@ public class HexMap
 		
 		// calculate hexagon height from given width
 		// NodeHeight = 0.5 * NodeWidth * ( tan(PI/6) + tan(PI/3) ) = 4/6 * sqrt(3) * NodeWidth
+		//    or NodeHeight / cos(30)
 		NodeHeight = 4/6f * Mathf.Sqrt(3) * NodeWidth;
 	}
 	
