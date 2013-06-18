@@ -29,9 +29,29 @@ public class Visualizer : MonoBehaviour
 		me = this;
 		lines = new List<Line>();
 		
-		createLineMaterial();
+		//createLineMaterial();
+	}
+     
+	public static void DrawLine(Vector3 start, Vector3 end, Color c)
+	{
+		me.lines.Add(new Line(start, end, c));
 	}
 	
+	// Gizmos drawing method
+	void OnDrawGizmos()
+	{
+		if(lines == null || lines.Count == 0) return;
+		
+		foreach( Line line in lines )
+		{
+			Gizmos.color = line.Color;
+			Gizmos.DrawLine(line.Start, line.End);
+		}
+		lines.Clear();
+	}
+	
+	// GL drawing method, only shows in game view
+	/*
     void createLineMaterial()
     {
         if( !lineMaterial )
@@ -47,12 +67,6 @@ public class Visualizer : MonoBehaviour
             lineMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
         }
     }
-     
-	public static void DrawLine(Vector3 start, Vector3 end, Color c)
-	{
-		me.lines.Add(new Line(start, end, c));
-	}
-	
     void OnPostRender()
     {
 		if(lines.Count == 0) return;
@@ -69,4 +83,5 @@ public class Visualizer : MonoBehaviour
 		
 		lines.Clear();
     }
+    */
 }

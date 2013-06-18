@@ -43,15 +43,13 @@ public class Tower : BasicObject
 			// targeting visualization
 			float cdRatio = nextAttackCooldown / AttackCooldown;
 			
-			Debug.DrawLine(
-				gun.position, 
-				CurrentTarget.transform.position, 
-				new Color(
-					cdRatio > .5f ? 2-cdRatio*2 : 1, 
-					cdRatio > .5f ? 1 : cdRatio*2, 
-					0
-				)
+			Color lineColor = new Color(
+				cdRatio > .5f ? 2-cdRatio*2 : 1, 
+				cdRatio > .5f ? 1 : cdRatio*2, 
+				0
 			);
+			
+			Visualizer.DrawLine(gun.position, CurrentTarget.transform.position, lineColor);
 		}
 		base.Update ();
 	}
