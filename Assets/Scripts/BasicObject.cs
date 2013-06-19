@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEditor;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,6 +12,9 @@ public class BasicObject : MonoBehaviour
 	
 	// how far the object can see
 	public float RangeOfView = 5;
+	
+	public bool DrawRangeOfView = false;
+	public float DrawViewHeight = 0.1f;
 	
 	// how large the object is
 	// -> should we take this into account when deciding whether targets are in range or not?
@@ -34,9 +39,13 @@ public class BasicObject : MonoBehaviour
 	
 	// caching these is efficient, because the get and set under the hood is a bit slow when used extensively
 	// don't worry about it until performance is poor though ;)
-	new Transform transform;
+	//new Transform transform;
 	new Renderer renderer;
 	Material material;
+	
+	GameObject lineObject;
+	LineRenderer lineRenderer;
+	Material lineMaterial;
 	
 	#endregion
 	
@@ -44,8 +53,8 @@ public class BasicObject : MonoBehaviour
 	// Use this for initialization
 	protected virtual void Start ()
 	{
-		transform = this.GetComponent<Transform>();
-		renderer = this.GetComponentInChildren<Renderer>();
+		//transform = this.GetComponent<Transform>();
+		renderer = transform.FindChild("Model").GetComponent<Renderer>();
 		material = renderer.material;
 		
 		HP = MaxHP;
@@ -220,8 +229,10 @@ public class BasicObject : MonoBehaviour
 	{
 		return -obj.HP;
 	}
+	#endregion
 	
-	//Visualisation
+	#region Visualization
+	
 	public void Blink(Color col)
 	{
 		StartCoroutine(blink(col));
@@ -235,26 +246,72 @@ public class BasicObject : MonoBehaviour
 		
 		material.color=Color.white;
 	}
+	
+	const int numLineSegments = 20;
 	public void drawRange()
 	{
-		float theta_scale = 0.1f;             //Set lower to add more points
-		int size = (int)Math.Round((2.0 * Math.PI) / theta_scale, 0); //Total number of points in circle.
+		// if we don't have it yet, get the line object
+		if(!lineObject)
+		{
+			Transform t = transform.FindChild("LineObject");
+			if(t)
+			{
+				lineObject = t.gameObject;
+				lineRenderer = lineObject.GetComponent<LineRenderer>();
+			}
+		}
 		
-		LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
-		lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
-		lineRenderer.SetColors(Color.red, Color.red);
-		lineRenderer.SetWidth(0.1f, 0.1f);
-		lineRenderer.SetVertexCount(size);
+		// if none exists, create one
+		/*if(!lineObject)
+		{
+			lineObject = new GameObject("LineObject");
+			lineObject.transform.parent = transform;
+
+			lineRenderer = lineObject.AddComponent<LineRenderer>();
+			lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+			lineRenderer.SetColors(Color.red, Color.red);
+			lineRenderer.SetWidth(0.1f, 0.1f);
+			lineRenderer.SetVertexCount(numLineSegments+1);
+			lineRenderer.useWorldSpace = false;
+			
+			SceneView.RepaintAll();
+		}*/
 		
-		int i = 0;
-		for(float theta = 0f; theta < 2 * Math.PI; theta += 0.1f) {
-		    float x = transform.position.x + RangeOfView * (float)Math.Cos(theta);
-		    float z = transform.position.z + RangeOfView * (float)Math.Sin(theta);
+		// set inactive when no drawing is wanted and return
+		if(!DrawRangeOfView)
+		{
+			if(lineObject.activeSelf)
+			{
+				lineObject.SetActive(false);
+				SceneView.RepaintAll();
+			}
+			return;
+		}
 		
-		    Vector3 pos = new Vector3(x, 0.6f, z);
-		    lineRenderer.SetPosition(i, pos);
-		    i+=1;
-		}	
+		// set active if required
+		if(!lineObject.activeSelf)
+		{
+			lineObject.SetActive(true);
+			SceneView.RepaintAll();
+		}
+		
+		// set parameters
+		lineObject.transform.localPosition = new Vector3(0, DrawViewHeight, 0);
+		for(int i=0; i < numLineSegments+1; i++)
+		{
+			float theta = i*Mathf.PI*2/(numLineSegments);
+		    float x = RangeOfView * (float)Math.Cos(theta);
+			float y = 0;
+		    float z = RangeOfView * (float)Math.Sin(theta);
+			
+		    lineRenderer.SetPosition(i, new Vector3(x, y, z));
+		}
 	}
+	
+	void OnDrawGizmos()
+	{
+		drawRange();
+	}
+	
 	#endregion
 }

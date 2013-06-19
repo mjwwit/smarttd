@@ -1,9 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-// Created it and ended up using Debug.DrawLine, because this didn't show up in the scene view.
-// Does the same thing as Debug.DrawLine, but in release mode.
-// 
 public class Visualizer : MonoBehaviour
 {
 	struct Line
@@ -24,12 +21,10 @@ public class Visualizer : MonoBehaviour
 	List<Line> lines;
     Material lineMaterial;
 	
-	void Start()
+	void Awake()
 	{
 		me = this;
 		lines = new List<Line>();
-		
-		//createLineMaterial();
 	}
      
 	public static void DrawLine(Vector3 start, Vector3 end, Color c)
