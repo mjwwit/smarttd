@@ -52,6 +52,8 @@ public class Tower : BasicObject
 			Visualizer.DrawLine(gun.position, CurrentTarget.transform.position, lineColor);
 		}
 		base.Update ();
+		
+		drawRange ();
 	}
 	
 	void Fire()

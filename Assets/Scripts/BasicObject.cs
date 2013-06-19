@@ -235,5 +235,26 @@ public class BasicObject : MonoBehaviour
 		
 		material.color=Color.white;
 	}
+	public void drawRange()
+	{
+		float theta_scale = 0.1f;             //Set lower to add more points
+		int size = (int)Math.Round((2.0 * Math.PI) / theta_scale, 0); //Total number of points in circle.
+		
+		LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
+		lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+		lineRenderer.SetColors(Color.red, Color.red);
+		lineRenderer.SetWidth(0.1f, 0.1f);
+		lineRenderer.SetVertexCount(size);
+		
+		int i = 0;
+		for(float theta = 0f; theta < 2 * Math.PI; theta += 0.1f) {
+		    float x = transform.position.x + RangeOfView * (float)Math.Cos(theta);
+		    float z = transform.position.z + RangeOfView * (float)Math.Sin(theta);
+		
+		    Vector3 pos = new Vector3(x, 0.6f, z);
+		    lineRenderer.SetPosition(i, pos);
+		    i+=1;
+		}	
+	}
 	#endregion
 }
