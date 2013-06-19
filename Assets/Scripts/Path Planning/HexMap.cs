@@ -1,5 +1,5 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class HexMap : MonoBehaviour
 {
@@ -23,6 +23,9 @@ public class HexMap : MonoBehaviour
 	// Hexagonal grid!
 	Node[][] nodes;
 	
+	// stores NodeWidth value to check for changes
+	float varWidth = 0;
+	
 	#region Initialization
 	public void Awake()
 	{
@@ -40,6 +43,7 @@ public class HexMap : MonoBehaviour
 	void Initialize(bool dummyValues)
 	{
 		NodeHeightDisplacement = GetNodeHeightDisplacement(NodeWidth);
+		varWidth = NodeWidth;
 		
 		nodes = new Node[NodeCountX][];
 		for(int i = 0; i < NodeCountX; i++)
@@ -50,7 +54,7 @@ public class HexMap : MonoBehaviour
 				nodes[i][j] = new Node()
 				{
 					Index = new NodeIndex(i, j),
-					//Position = GetNodePosition(i, j),
+					Position = GetNodePosition(i, j),
 					Cost = dummyValues ? Mathf.FloorToInt(Random.value * 100) : 0
 				};
 			}
@@ -90,11 +94,29 @@ public class HexMap : MonoBehaviour
 		return index;
 	}
 	
+	public List<NodeIndex> GetCellsInRangeOf(BasicObject o)
+	{
+		List<NodeIndex> indices = new List<NodeIndex>();
+		
+		for(int i = 0; i < NodeCountX; i++)
+		{
+			for(int j = 0; j < NodeCountY; j++)
+			{
+				NodeIndex n = new NodeIndex(i, j);
+				if(o.IsInRange(GetNodePosition(n)) >= 0)
+				{
+					indices.Add(n);
+				}
+			}
+		}
+		
+		return indices;
+	}
+	
 	#endregion
 	
 	#region Visualization
 	
-	float varWidth = 0;
 	void OnDrawGizmosSelected()
 	{
 		if(nodes == null 
@@ -103,7 +125,6 @@ public class HexMap : MonoBehaviour
 			|| varWidth != NodeWidth)
 		{
 			Initialize(true);
-			varWidth = NodeWidth;
 		}
 		
 		for(int i = 0; i < NodeCountX; i++)

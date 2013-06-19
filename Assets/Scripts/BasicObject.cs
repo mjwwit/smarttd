@@ -82,13 +82,19 @@ public class BasicObject : MonoBehaviour
 	
 	public float DistanceTo(BasicObject toObj)
 	{
-		return Distance(this, toObj);
+		return Distance(this, toObj.transform.position);
 	}
-	
-	// maybe a 2d distance function is better
+	public float DistanceTo(Vector3 toPos)
+	{
+		return Distance(this, toPos);
+	}
 	public static float Distance(BasicObject fromObj, BasicObject toObj)
 	{
-		return Vector3.Distance(fromObj.transform.position, toObj.transform.position);
+		return Distance(fromObj, toObj.transform.position);
+	}
+	public static float Distance(BasicObject fromObj, Vector3 toPos)
+	{
+		return Vector3.Distance(fromObj.transform.position, toPos);
 	}
 	
 	/// <summary>
@@ -96,7 +102,14 @@ public class BasicObject : MonoBehaviour
 	/// </summary>
 	public float IsInRange(BasicObject toObj)
 	{
-		return IsInRange(this, toObj);
+		return IsInRange(this, toObj.transform.position);
+	}
+	/// <summary>
+	/// Returns the distance if in range, -1 otherwise.
+	/// </summary>
+	public float IsInRange(Vector3 toPos)
+	{
+		return IsInRange(this, toPos);
 	}
 	
 	/// <summary>
@@ -104,8 +117,15 @@ public class BasicObject : MonoBehaviour
 	/// </summary>
 	public static float IsInRange(BasicObject fromObj, BasicObject toObj)
 	{
+		return IsInRange(fromObj, toObj.transform.position);
+	}
+	/// <summary>
+	/// Returns the distance if in range, -1 otherwise.
+	/// </summary>
+	public static float IsInRange(BasicObject fromObj, Vector3 toPos)
+	{
 		// determine distance between objects
-		float distance = Distance(fromObj, toObj);
+		float distance = Distance(fromObj, toPos);
 		
 		// correct for size of target objects
 		// distance -= toObj.Radius;

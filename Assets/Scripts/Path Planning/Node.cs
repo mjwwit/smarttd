@@ -13,7 +13,7 @@ public struct NodeIndex
 // Using structs may be a bit more difficult to program for (not sure?).
 public struct Node
 {
-	public NodeIndex Index;
-	//public Vector3 Position;
 	public int Cost;
+	public NodeIndex Index;
+	public Vector3 Position;
 }
