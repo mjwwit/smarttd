@@ -225,11 +225,10 @@ public class BasicObject : MonoBehaviour
 		return bestSuitedObject;
 	}
 	
-	/// <summary>
-	/// Criterion function delegate. The output float of this function should behave like a distance function.
-	///  The closer it is to fulfilling the criterion, the smaller the value.
-	/// </summary>
-	public delegate bool Criterion( BasicObject obj );
+	/* Criterion template: bool Criterion( BasicObject obj );
+	 * The output float of this function should behave like a distance function.
+	 * The closer it is to fulfilling the criterion, the smaller the value.
+	*/
 	
 	// A naïve and simple check to see how close the object is to the attacker's goal.
 	public static float Criterion_DistanceToGoal(BasicObject obj)

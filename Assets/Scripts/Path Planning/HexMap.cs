@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public class HexMap : MonoBehaviour
@@ -55,7 +56,7 @@ public class HexMap : MonoBehaviour
 				{
 					Index = new NodeIndex(i, j),
 					Position = GetNodePosition(i, j),
-					Cost = dummyValues ? Mathf.FloorToInt(Random.value * 100) : 0
+					Cost = dummyValues ? Mathf.FloorToInt(UnityEngine.Random.value * 100) : 0
 				};
 			}
 		}
@@ -96,14 +97,18 @@ public class HexMap : MonoBehaviour
 	
 	public List<NodeIndex> GetCellsInRangeOf(BasicObject o)
 	{
+		return GetCellsInRangeOf(this, o);
+	}
+	public static List<NodeIndex> GetCellsInRangeOf(HexMap m, BasicObject o)
+	{
 		List<NodeIndex> indices = new List<NodeIndex>();
 		
-		for(int i = 0; i < NodeCountX; i++)
+		for(int i = 0; i < m.NodeCountX; i++)
 		{
-			for(int j = 0; j < NodeCountY; j++)
+			for(int j = 0; j < m.NodeCountY; j++)
 			{
 				NodeIndex n = new NodeIndex(i, j);
-				if(o.IsInRange(GetNodePosition(n)) >= 0)
+				if(o.IsInRange(m.GetNodePosition(n)) >= 0)
 				{
 					indices.Add(n);
 				}
@@ -111,6 +116,44 @@ public class HexMap : MonoBehaviour
 		}
 		
 		return indices;
+	}
+	
+	#endregion
+	
+	#region Cell Modification
+	
+	/// <summary>
+	/// Modifies the cells in range with a given Modifier function. 
+	/// All cells are checked for whether they're in range, that can probably use some optimization.
+	/// </summary>
+	public static void ModifyCellsInRange<T>(HexMap m, T o, Func<T, int, int> Modifier) where T : BasicObject
+	{
+		for(int i = 0; i < m.NodeCountX; i++)
+		{
+			for(int j = 0; j < m.NodeCountY; j++)
+			{
+				NodeIndex n = new NodeIndex(i, j);
+				if(o.IsInRange(m.GetNodePosition(n)) >= 0)
+				{
+					m.nodes[i][j].Cost = Modifier(o, m.nodes[i][j].Cost);
+				}
+			}
+		}
+	}
+
+	/* Modifier template: int Modifier( int cost );
+	 * The output float of this function should behave like a distance function.
+	 * The closer it is to fulfilling the criterion, the smaller the value.
+	*/
+	
+	// Just an arbitary example function, adding a tower's damage times ten to all cells in range.
+	public static int Modifier_AddTowerDamage(Tower t, int cost)
+	{
+		//Tower t = o as Tower;
+		//if(t)
+			return cost += t.Damage * 10;
+				
+		//return cost;
 	}
 	
 	#endregion
