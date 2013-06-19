@@ -283,7 +283,8 @@ public class BasicObject : MonoBehaviour
 			if(lineObject.activeSelf)
 			{
 				lineObject.SetActive(false);
-				SceneView.RepaintAll();
+				//SceneView.RepaintAll();
+				HandleUtility.Repaint();
 			}
 			return;
 		}
@@ -292,7 +293,8 @@ public class BasicObject : MonoBehaviour
 		if(!lineObject.activeSelf)
 		{
 			lineObject.SetActive(true);
-			SceneView.RepaintAll();
+			//SceneView.RepaintAll();
+			HandleUtility.Repaint();
 		}
 		
 		// set parameters

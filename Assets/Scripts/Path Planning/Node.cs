@@ -4,6 +4,7 @@ using System.Collections;
 public struct NodeIndex
 {
 	public int X, Y;
+	public NodeIndex(int x, int y) { X=x;Y=y; }
 }
 
 // Not sure if this should be a class or a struct.
@@ -12,10 +13,7 @@ public struct NodeIndex
 // Using structs may be a bit more difficult to program for (not sure?).
 public struct Node
 {
-	// maybe store the world position as well
-	// or maybe in a separate array?
-	// public Vector2 Position;
-	
 	public NodeIndex Index;
+	//public Vector3 Position;
 	public int Cost;
 }

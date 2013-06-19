@@ -79,4 +79,47 @@ public class Visualizer : MonoBehaviour
 		lines.Clear();
     }
     */
+	
+	/// <summary>
+    /// Method to convert HSV to RGB, based on information from Wikipedia
+	/// </summary>
+	/// <returns>
+	/// Color in RGB.
+	/// </returns>
+	/// <param name='hue'>
+	/// Hue. [0, 360>
+	/// </param>
+	/// <param name='saturation'>
+	/// Saturation. [0, 1]
+	/// </param>
+	/// <param name='value'>
+	/// Value. [0, 1]
+	/// </param>
+    public static Color HSVtoRGB(float hue, float saturation, float value)
+    {
+		hue %= 360;
+		
+        Color res;
+        float c = value * saturation;
+        float x = c * (1 - Mathf.Abs((hue / 60) % 2 - 1));
+        float m = value - c;
+
+        c += m;
+        x += m;
+
+        if (hue < 60)
+            res = new Color(c, x, m);
+        else if (hue < 120)
+            res = new Color(x, c, m);
+        else if (hue < 180)
+            res = new Color(m, c, x);
+        else if (hue < 240)
+            res = new Color(m, x, c);
+        else if (hue < 300)
+            res = new Color(x, m, c);
+        else
+            res = new Color(c, m, x);
+
+        return res;
+    }
 }
