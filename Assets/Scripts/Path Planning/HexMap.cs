@@ -63,9 +63,10 @@ public class HexMap : MonoBehaviour
 			}
 		}
 		
-		//DEBUG: Load values based on tower position
-		Tower t1 = (Tower)FindObjectsOfType(System.Type.GetType("Tower")).GetValue(0);
-		ModifyCellsInRange<Tower>(this, t1, HexMap.Modifier_AddTowerDamage);
+		//DEBUG: Load values based on tower positions
+		foreach(Tower t in FindObjectsOfType(System.Type.GetType("Tower"))){
+			ModifyCellsInRange<Tower>(this, t, HexMap.Modifier_AddTowerDamage);
+		}
 	}
 	
 	#endregion
