@@ -12,6 +12,8 @@ public class HexMap : MonoBehaviour
 	
 	public float NodeWidth = 1;
 	
+	public bool dummyData = false;
+	
 	[HideInInspector]
 	public float NodeHeightDisplacement;
 	
@@ -59,6 +61,11 @@ public class HexMap : MonoBehaviour
 					Cost = dummyValues ? Mathf.FloorToInt(UnityEngine.Random.value * 100) : 0
 				};
 			}
+		}
+		
+		//DEBUG: Load values based on tower positions
+		foreach(Tower t in FindObjectsOfType(System.Type.GetType("Tower"))){
+			ModifyCellsInRange<Tower>(this, t, HexMap.Modifier_AddTowerDamage);
 		}
 	}
 	
@@ -214,6 +221,16 @@ public class HexMap : MonoBehaviour
 	
 	#endregion
 	
+	#region Analyzation
+	
+	// Find the optimal path through the given HexMap m for given unit c to Goal g, using Dijkstra's.
+	public static List<NodeIndex> getOptimalPath<T>(HexMap m, T c/*, Goal g*/) where T : BasicObject
+	{
+		return null;
+	}
+	
+	#endregion
+	
 	#region Visualization
 	
 	void OnDrawGizmosSelected()
@@ -223,7 +240,7 @@ public class HexMap : MonoBehaviour
 			|| NodeCountY > nodes[0].Length
 			|| varWidth != NodeWidth)
 		{
-			Initialize(true);
+			Initialize(dummyData);
 		}
 		
 		for(int i = 0; i < NodeCountX; i++)
