@@ -65,7 +65,7 @@ public class HexMap : MonoBehaviour
 		
 		//DEBUG: Load values based on tower positions
 		foreach(Tower t in FindObjectsOfType(System.Type.GetType("Tower"))){
-			ModifyCellsInRange<Tower>(this, t, HexMap.Modifier_AddTowerDamage);
+			ModifyCellsInRange<Tower>(this, t, HexMap.GridModifier_AddTowerDamage, t);
 		}
 	}
 	
