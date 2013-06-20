@@ -14,6 +14,9 @@ public class HexMap : MonoBehaviour
 	
 	public bool dummyData = false;
 	
+	public int goalX = 9;
+	public int goalY = 9;
+	
 	[HideInInspector]
 	public float NodeHeightDisplacement;
 	
@@ -63,11 +66,40 @@ public class HexMap : MonoBehaviour
 			}
 		}
 		
-		//DEBUG: Load values based on tower positions
-		foreach(Tower t in FindObjectsOfType(System.Type.GetType("Tower"))){
-			ModifyCellsInRange<Tower>(this, t, HexMap.GridModifier_AddTowerDamage, t);
+		if(!dummyValues)
+		{
+			// Load values based on distance to goal
+			initNodeCost(nodes[goalX][goalY]);
+			
+			//DEBUG: Load values based on tower positions
+			foreach(Tower t in FindObjectsOfType(System.Type.GetType("Tower")))
+			{
+				ModifyCellsInRange<Tower>(this, t, HexMap.GridModifier_AddTowerDamage, t);
+			}
 		}
 	}
+	
+	// Breadth-First-Search based grid cost initialization
+	public void initNodeCost(Node n)
+	{
+		Queue<Node> queue = new Queue<Node>();
+		queue.Enqueue(n);
+		n.Cost = 1;
+		
+		while(queue.Count != 0)
+		{
+			n = queue.Dequeue();
+			foreach(Node n2 in NeighboursOf(n))
+			{
+				if(n2.Cost == 0)
+				{
+					n2.Cost = n.Cost + 1;
+					queue.Enqueue(n2);
+				}
+			}
+		}
+	}
+			
 	
 	#endregion
 	
@@ -110,6 +142,8 @@ public class HexMap : MonoBehaviour
 		return nodes[i.X][i.Y];
 	}
 	public Node GetNode(int X, int Y) { return nodes[X][Y]; }
+	
+	public Node getGoalNode(){ return GetNode(goalX, goalY); }
 	
 	public List<Node> GetCellsInRangeOf(BasicObject o)
 	{
