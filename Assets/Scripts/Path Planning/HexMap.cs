@@ -12,6 +12,8 @@ public class HexMap : MonoBehaviour
 	
 	public float NodeWidth = 1;
 	
+	public bool dummyData = false;
+	
 	[HideInInspector]
 	public float NodeHeightDisplacement;
 	
@@ -60,6 +62,10 @@ public class HexMap : MonoBehaviour
 				};
 			}
 		}
+		
+		//DEBUG: Load values based on tower position
+		Tower t1 = (Tower)FindObjectsOfType(System.Type.GetType("Tower")).GetValue(0);
+		ModifyCellsInRange<Tower>(this, t1, HexMap.Modifier_AddTowerDamage);
 	}
 	
 	#endregion
@@ -167,7 +173,7 @@ public class HexMap : MonoBehaviour
 			|| NodeCountY > nodes[0].Length
 			|| varWidth != NodeWidth)
 		{
-			Initialize(true);
+			Initialize(dummyData);
 		}
 		
 		for(int i = 0; i < NodeCountX; i++)
