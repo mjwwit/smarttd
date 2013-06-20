@@ -165,6 +165,16 @@ public class HexMap : MonoBehaviour
 	
 	#endregion
 	
+	#region Analyzation
+	
+	// Find the optimal path through the given HexMap m for given unit c to Goal g, using Dijkstra's.
+	public static List<NodeIndex> getOptimalPath<T>(HexMap m, T c/*, Goal g*/) where T : BasicObject
+	{
+		return null;
+	}
+	
+	#endregion
+	
 	#region Visualization
 	
 	void OnDrawGizmosSelected()
