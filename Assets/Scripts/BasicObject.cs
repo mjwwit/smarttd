@@ -43,6 +43,7 @@ public class BasicObject : MonoBehaviour
 	new Renderer renderer;
 	Material material;
 	
+	// used for drawing the range
 	GameObject lineObject;
 	LineRenderer lineRenderer;
 	Material lineMaterial;
@@ -80,6 +81,7 @@ public class BasicObject : MonoBehaviour
 	
 	#region Helper Functions
 	
+	#region Distance
 	public float DistanceTo(BasicObject toObj)
 	{
 		return Distance(this, toObj.transform.position);
@@ -96,7 +98,9 @@ public class BasicObject : MonoBehaviour
 	{
 		return Vector3.Distance(fromObj.transform.position, toPos);
 	}
+	#endregion
 	
+	#region IsInRange
 	/// <summary>
 	/// Returns the distance if in range, -1 otherwise.
 	/// </summary>
@@ -136,8 +140,9 @@ public class BasicObject : MonoBehaviour
 			return Mathf.Max(0, distance);
 		else return -1;
 	}
+	#endregion
 	
-	
+	#region FindInRange
 	public static List<BasicObject> FindAttackersInRange( BasicObject obj )
 	{
 		List<BasicObject> objects = new List<BasicObject>();
@@ -189,7 +194,6 @@ public class BasicObject : MonoBehaviour
 		}
 		return closestObject;
 	}
-	
 	
 	/// <summary>
 	/// For every object in objects, first checks if the object is in range of fromObj, 
@@ -248,6 +252,8 @@ public class BasicObject : MonoBehaviour
 	{
 		return -obj.HP;
 	}
+	#endregion
+	
 	#endregion
 	
 	#region Visualization

@@ -66,6 +66,7 @@ public class HexMap : MonoBehaviour
 	
 	#region Indexing
 	
+	public Vector3 GetNodePosition(Node n) { return GetNodePosition(n.Index.X, n.Index.Y); }
 	public Vector3 GetNodePosition(NodeIndex index) 
 	{
 		return GetNodePosition(index.X, index.Y);
@@ -95,27 +96,79 @@ public class HexMap : MonoBehaviour
 		return index;
 	}
 	
-	public List<NodeIndex> GetCellsInRangeOf(BasicObject o)
+	public Node GetNode(Vector3 pos) { return GetNode(pos.x, pos.z); }
+	public Node GetNode(float x, float z)
+	{
+		NodeIndex i = GetNodeIndex(x, z);
+		return nodes[i.X][i.Y];
+	}
+	public Node GetNode(int X, int Y) { return nodes[X][Y]; }
+	
+	public List<Node> GetCellsInRangeOf(BasicObject o)
 	{
 		return GetCellsInRangeOf(this, o);
 	}
-	public static List<NodeIndex> GetCellsInRangeOf(HexMap m, BasicObject o)
+	public static List<Node> GetCellsInRangeOf(HexMap m, BasicObject o)
 	{
-		List<NodeIndex> indices = new List<NodeIndex>();
+		List<Node> nodes = new List<Node>();
 		
-		for(int i = 0; i < m.NodeCountX; i++)
+		for(int x = 0; x < m.NodeCountX; x++)
 		{
-			for(int j = 0; j < m.NodeCountY; j++)
+			for(int y = 0; y < m.NodeCountY; y++)
 			{
-				NodeIndex n = new NodeIndex(i, j);
-				if(o.IsInRange(m.GetNodePosition(n)) >= 0)
+				Node n = m.nodes[x][y];
+				if(o.IsInRange(m.GetNodePosition(n.Index)) >= 0)
 				{
-					indices.Add(n);
+					nodes.Add(n);
 				}
 			}
 		}
 		
-		return indices;
+		return nodes;
+	}
+	
+	public IEnumerable<Node> NeighboursOf(Node n) { return NeighboursOf(n.Index.X, n.Index.Y); }
+	public IEnumerable<Node> NeighboursOf(NodeIndex i) { return NeighboursOf(i.X, i.Y); }
+	public IEnumerable<Node> NeighboursOf(int x, int y)
+	{
+		int xMin = x-1;
+		int xPlus = x+1;
+		int yMin = y-1;
+		int yPlus = y+1;
+		
+		// these series of if-statements could use some optimization by branching
+		if(y%2==0)
+		{
+			// neighbours clockwise, starting left
+			// x-1, y
+			// y+1, x-1
+			// y+1, x
+			// x+1, y
+			// y-1, x
+			// y-1, x-1
+			if(xMin >= 0) 						yield return nodes[x-1][y];
+			if(xMin >= 0 && yPlus < NodeCountY) yield return nodes[x-1][y+1];
+			if(yPlus < NodeCountY) 				yield return nodes[x]  [y+1];
+			if(xPlus < NodeCountX) 				yield return nodes[x+1][y];
+			if(yMin >= 0) 						yield return nodes[x]  [y-1];
+			if(xMin >= 0 && yMin >= 0)		 	yield return nodes[x-1][y-1];
+		}
+		else
+		{
+			// neighbours clockwise, starting left
+			// x-1, y
+			// y+1, x
+			// y+1, x+1
+			// x+1, y
+			// y-1, x+1
+			// y-1, x
+			if(xMin >= 0) 								 yield return nodes[x-1][y];
+			if(yPlus < NodeCountY) 						 yield return nodes[x][y+1];
+			if(xPlus < NodeCountX && yPlus < NodeCountY) yield return nodes[x+1]  [y+1];
+			if(xPlus < NodeCountX) 						 yield return nodes[x+1][y];
+			if(xPlus < NodeCountX && yMin >= 0) 		 yield return nodes[x+1]  [y-1];
+			if(yMin >= 0) 								 yield return nodes[x][y-1];
+		}
 	}
 	
 	#endregion
@@ -126,7 +179,7 @@ public class HexMap : MonoBehaviour
 	/// Modifies the cells in range with a given Modifier function. 
 	/// All cells are checked for whether they're in range, that can probably use some optimization.
 	/// </summary>
-	public static void ModifyCellsInRange<T>(HexMap m, T o, Func<T, int, int> Modifier) where T : BasicObject
+	public static void ModifyCellsInRange<T>(HexMap m, BasicObject o, Func<int, T, int> Modifier, T metaData)
 	{
 		for(int i = 0; i < m.NodeCountX; i++)
 		{
@@ -135,25 +188,28 @@ public class HexMap : MonoBehaviour
 				NodeIndex n = new NodeIndex(i, j);
 				if(o.IsInRange(m.GetNodePosition(n)) >= 0)
 				{
-					m.nodes[i][j].Cost = Modifier(o, m.nodes[i][j].Cost);
+					m.nodes[i][j].Cost = Modifier(m.nodes[i][j].Cost, metaData);
 				}
 			}
 		}
 	}
-
-	/* Modifier template: int Modifier( int cost );
-	 * The output float of this function should behave like a distance function.
-	 * The closer it is to fulfilling the criterion, the smaller the value.
-	*/
 	
-	// Just an arbitary example function, adding a tower's damage times ten to all cells in range.
-	public static int Modifier_AddTowerDamage(Tower t, int cost)
+	/* Modifier template: int Modifier( int cost );
+	 * Input is a BasicObject as metadata and the grid cell's current cost.
+	 * Output is the new cell value.
+	 * 
+	 * Example usage:
+	 * ModifyCellsInRange<MetaDataType>(hexMap, basicObject, GridModifierFunc, metaDataObject);
+	 * 
+	 * For example, using the grid modifier that adds tower damage:
+	 * ModifyCellsInRange<Tower>(hexMap, tower, GridModifier_AddTowerDamage, tower);
+	 * 
+	 */
+	
+	// Just an arbitary example function, adding a tower's damage times ten to the cell.
+	public static int GridModifier_AddTowerDamage(int cost, Tower t)
 	{
-		//Tower t = o as Tower;
-		//if(t)
-			return cost += t.Damage * 10;
-				
-		//return cost;
+		return cost += t.Damage * 10;
 	}
 	
 	#endregion

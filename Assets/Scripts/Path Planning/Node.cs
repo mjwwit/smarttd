@@ -11,7 +11,7 @@ public struct NodeIndex
 // Copying classes around could give us some garbage collection issues.
 // 	-> However, this might not matter to us, even if we notice some of it
 // Using structs may be a bit more difficult to program for (not sure?).
-public struct Node
+public class Node
 {
 	public int Cost;
 	public NodeIndex Index;
