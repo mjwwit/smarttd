@@ -14,6 +14,7 @@ public struct NodeIndex
 public class Node
 {
 	public int Cost;
+	public int ID;
 	public NodeIndex Index;
 	public Vector3 Position;
 }

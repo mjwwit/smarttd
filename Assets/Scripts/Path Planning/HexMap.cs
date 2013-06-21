@@ -51,6 +51,8 @@ public class HexMap : MonoBehaviour
 		NodeHeightDisplacement = GetNodeHeightDisplacement(NodeWidth);
 		varWidth = NodeWidth;
 		
+		int currentID = 0;
+		
 		nodes = new Node[NodeCountX][];
 		for(int i = 0; i < NodeCountX; i++)
 		{
@@ -61,8 +63,10 @@ public class HexMap : MonoBehaviour
 				{
 					Index = new NodeIndex(i, j),
 					Position = GetNodePosition(i, j),
-					Cost = dummyValues ? Mathf.FloorToInt(UnityEngine.Random.value * 100) : 0
+					Cost = dummyValues ? Mathf.FloorToInt(UnityEngine.Random.value * 100) : 0,
+					ID = currentID
 				};
+				currentID++;
 			}
 		}
 		
@@ -135,6 +139,7 @@ public class HexMap : MonoBehaviour
 		return index;
 	}
 	
+	public Node GetNode(int id) { return GetNode((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY)); }
 	public Node GetNode(Vector3 pos) { return GetNode(pos.x, pos.z); }
 	public Node GetNode(float x, float z)
 	{
@@ -168,6 +173,7 @@ public class HexMap : MonoBehaviour
 		return nodes;
 	}
 	
+	public IEnumerable<Node> NeighboursOf(int id) { return NeighboursOf((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY)); }
 	public IEnumerable<Node> NeighboursOf(Node n) { return NeighboursOf(n.Index.X, n.Index.Y); }
 	public IEnumerable<Node> NeighboursOf(NodeIndex i) { return NeighboursOf(i.X, i.Y); }
 	public IEnumerable<Node> NeighboursOf(int x, int y)
@@ -257,10 +263,72 @@ public class HexMap : MonoBehaviour
 	
 	#region Analyzation
 	
-	// Find the optimal path through the given HexMap m for given unit c to Goal g, using Dijkstra's.
-	public static List<NodeIndex> getOptimalPath<T>(HexMap m, T c/*, Goal g*/) where T : BasicObject
+	// Find the optimal path through the given HexMap m for given unit c to goal Node g, using Dijkstra's.
+	public static List<Node> getOptimalPath<T>(HexMap m, T c, Node g) where T : BasicObject
 	{
-		return null;
+		int[] distances = new int[m.NodeCountX * m.NodeCountY];
+		int[] previous = new int[m.NodeCountX * m.NodeCountY];
+		
+		for(int i = 0; i < distances.Length; ++i)
+		{
+			distances[i] = int.MaxValue;
+			previous[i] = -1;
+		}
+		
+		int source = m.GetNode(new Vector3(c.transform.position.x, c.transform.position.y, c.transform.position.z)).ID;
+		distances[source] = 0;
+		
+		List<int> q = new List<int>();
+		
+		foreach(Node[] ns in m.nodes)
+			foreach(Node n in ns)
+				q.Add(n.ID);
+		
+		while(q.Count != 0)
+		{
+			// Find index with smallest distance
+			int minVal = int.MaxValue;
+			int minIndex = 0;
+			for(int i = 0; i < q.Count; ++i)
+			{
+				if(distances[q[i]] < minVal)
+				{
+					minIndex = q[i];
+					minVal = distances[q[i]];
+				}
+			}
+			
+			// Remove from list of unoptimized nodes
+			q.Remove(minIndex);
+			
+			// Check if goal is reached
+			if(minIndex == m.getGoalNode().ID) break;
+			
+			// Check if node is unreachable
+			if(minVal == int.MaxValue) break;
+			
+			foreach(Node n in m.NeighboursOf(minIndex))
+			{
+				// Check if more optimal path has been found
+				int alt = distances[minIndex] + n.Cost;
+				if(alt < distances[n.ID])
+				{
+					distances[n.ID] = alt;
+					previous[n.ID] = minIndex;
+				}
+			}
+		}
+		
+		// Reconstruct optimal path
+		List<Node> optimalPath = new List<Node>();
+		Node cn = m.getGoalNode();
+		while(previous[cn.ID] != -1)
+		{
+			optimalPath.Insert(0, cn);
+			cn = m.GetNode(previous[cn.ID]);
+		}
+		
+		return optimalPath;
 	}
 	
 	#endregion
