@@ -1,10 +1,59 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+public struct Line
+{
+	public Vector3 v, w;
+	public Line(Vector3 start, Vector3 end)
+	{
+		this.v = start;
+		this.w = end;
+	}
+	
+	// From http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+	// Return minimum distance between line segment vw and point p.
+	public float Distance2D(Vector3 p)
+	{
+		Vector3 t = ClosestPointOnLine(p);
+		t.y = 0;
+		p.y = 0;
+		return Vector3.Distance(t, p);
+		
+		/*
+		const float l2 = Vector3.Dot(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
+		if (l2 == 0.0f) return Vector3.Distance(p, v);   // v == w case
+		// Consider the line extending the segment, parameterized as v + t (w - v).
+		// We find projection of point p onto the line. 
+		// It falls where t = [(p-v) . (w-v)] / |w-v|^2
+		const float t = dot(p - v, w - v) / l2;
+		if (t < 0.0f) return Vector3.Distance(p, v);       // Beyond the 'v' end of the segment
+		else if (t > 1.0f) return Vector3.Distance(p, w);  // Beyond the 'w' end of the segment
+		const Vector3 projection = v + t * (w - v);  // Projection falls on the segment
+		return Vector3.Distance(p, projection);
+		*/
+	}
+	
+	public Vector3 ClosestPointOnLine(Vector3 p)
+	{
+		float l2 = Vector3.Dot(v, w);
+		if (l2 == 0.0) return v;
+		
+		// projected length
+		float t = Vector3.Dot(p - v, w - v) / l2;
+		if(t < 0.0f) return v;
+		else if(t > 1.0f) return w;
+		return v + t*(w-v);
+	}
+}
 // Static, for ease of programming. Not going to bother with fancy structures! Practicality is our friend.
 public static class Attacker
 {
 	public static Vector3 GoalDirection = Vector3.Normalize(new Vector3(1, 0, 0));
+	
+	public static Line Goal = new Line(
+		new Vector3(22.0f, 0.0f, 0),
+		new Vector3(22.0f, 0.0f, 0)
+	);
 	
 	public static List<BasicObject> Objects;
 	public static List<Unit> Units;
@@ -13,12 +62,6 @@ public static class Attacker
 	{
 		Objects = new List<BasicObject>( (Unit[])GameObject.FindObjectsOfType(typeof(Unit)) );
 		Units = new List<Unit>( (Unit[])GameObject.FindObjectsOfType(typeof(Unit)) );
-		
-		// set a goal for each unit
-		foreach(Unit unit in Units)
-		{
-			unit.SetGoal(GoalDirection * 1000);
-		}
 	}
 	
 	public static void AddObject(BasicObject obj)
@@ -31,5 +74,15 @@ public static class Attacker
 	{
 		Objects.Remove(obj);
 		if(obj.GetType() == typeof(Unit)) Units.Remove( (Unit)obj );
+	}
+	
+	// Check to see how close we are to the goal.
+	public static float DistanceToGoal(Vector3 pos)
+	{
+		return Goal.Distance2D(pos);
+	}
+	public static Vector3 ShortestVectorToGoal(Vector3 pos)
+	{
+		return Goal.ClosestPointOnLine(pos) - pos;
 	}
 }

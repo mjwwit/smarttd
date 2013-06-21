@@ -234,7 +234,6 @@ public class BasicObject : MonoBehaviour
 	 * The closer it is to fulfilling the criterion, the smaller the value.
 	*/
 	
-	// A naïve and simple check to see how close the object is to the attacker's goal.
 	public static float Criterion_DistanceToGoal(BasicObject obj)
 	{
 		// Project the object's position on the direction, bigger means it's closer to the goal.
