@@ -68,10 +68,10 @@ public class HexMap : MonoBehaviour
 					Cost = dummyValues ? Mathf.FloorToInt(UnityEngine.Random.value * 100) : 0,
 					ID = currentID
 				};
+				
 				currentID++;
 			}
 		}
-		
 		if(!dummyValues)
 		{
 			// Load values based on distance to goal
@@ -107,7 +107,6 @@ public class HexMap : MonoBehaviour
 			}
 		}
 	}
-			
 	
 	#endregion
 	
@@ -143,7 +142,14 @@ public class HexMap : MonoBehaviour
 		return index;
 	}
 	
-	public Node GetNode(int id) { return GetNode((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY)); }
+	// Get node by ID.
+	public Node GetNode(int id)
+	{
+		int y = id % NodeCountY;
+		int x = (id-y) / NodeCountY;
+		return GetNode(x, y);
+		//return GetNode((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY));
+	}
 	public Node GetNode(Vector3 pos) { return GetNode(pos.x, pos.z); }
 	public Node GetNode(float x, float z)
 	{

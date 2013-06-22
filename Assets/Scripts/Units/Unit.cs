@@ -55,19 +55,23 @@ public class Unit : BasicObject
 	
 	Vector3 GetGridGoal(Vector3 currentPosition)
 	{
-		if(path == null || path.Count == 0) 
+		// if we don´t have a path
+		if(path == null || path.Count == 0)
 		{
 			// get new path
 			path = GetPath();
 			cPathNode = 0;
 			
-			// if no path available
-			if(path.Count == 0)
+			// if still no path available, set goal to current position
+			if(path == null || path.Count == 0)
 				return currentPosition;
 		}
+		
+		// if the next node doesn't exist
+		// -- GOAL REACHED --
+		// set goal to current position
 		if(cPathNode >= path.Count)
 		{
-			// -- GOAL REACHED --
 			return currentPosition;
 		}
 		
@@ -78,20 +82,25 @@ public class Unit : BasicObject
 		{
 			// go to next node
 			cPathNode++;
-			
+		
+			// if the next node doesn't exist
+			// -- GOAL REACHED --
+			// set goal to current position
 			if(cPathNode >= path.Count)
 			{
-				// -- GOAL REACHED --
 				return currentPosition;
 			}
 		}
 		
+		// set goal to current target node's position
 		return path[cPathNode].Position;
 	}
 	
 	public List<Node> GetPath()
 	{
-		return new List<Node>();
+		// todo: execute pathfinding algorithm
+		
+		return null;
 	}
 	
 	public override void Die ()
