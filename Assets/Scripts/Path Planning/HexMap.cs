@@ -449,15 +449,6 @@ public class HexMap : MonoBehaviour
 				}
 			}
 		}
-		
-		Gizmos.color = Color.white;
-		if(OptimalPath.Count != 0)
-		{
-			for(int i = 0; i < OptimalPath.Count - 1; ++i)
-			{
-				Gizmos.DrawLine(GetNodePosition(OptimalPath[i]), GetNodePosition(OptimalPath[i+1]));
-			}
-		}
 	}
 	
 	#endregion

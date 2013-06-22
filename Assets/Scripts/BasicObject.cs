@@ -338,7 +338,7 @@ public class BasicObject : MonoBehaviour
 		}
 	}
 	
-	void OnDrawGizmos()
+	protected virtual void OnDrawGizmos()
 	{
 		drawRange();
 	}

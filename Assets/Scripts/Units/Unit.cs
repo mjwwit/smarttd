@@ -170,4 +170,21 @@ public class Unit : BasicObject
 		base.Die ();
 		Attacker.RemoveObject(this);
 	}
+	
+	#region Visualization
+	
+	protected virtual void OnDrawGizmosSelected ()
+	{
+		base.OnDrawGizmos ();
+		
+		if(path == null || path.Count <= 0) return;
+		
+		Gizmos.color = Color.white;
+		for(int i = 0; i < path.Count - 1; ++i)
+		{
+			Gizmos.DrawLine(map.GetNodePosition(path[i]), map.GetNodePosition(path[i+1]));
+		}
+	}
+	
+	#endregion
 }
