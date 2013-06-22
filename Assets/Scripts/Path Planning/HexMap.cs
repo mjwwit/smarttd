@@ -4,62 +4,62 @@ using System.Collections.Generic;
 
 public class HexMap : MonoBehaviour
 {
-	// the root is positioned at the middle of the bottom left node
-	public Vector3 Position;
+	#region Properties
 	
-	public int NodeCountX = 10;
-	public int NodeCountY = 10;
+	public HexMapDefinition d;
 	
-	public float NodeWidth = 1;
+	// draw grid ? 
+	public bool DrawGrid = true;
+	// use pseudo-random data for drawing grid?
+	public bool DummyData = false;
 	
-	public bool dummyData = false;
-	
-	public int goalX = 9;
-	public int goalY = 9;
-	
-	public List<Node> OptimalPath = new List<Node>();
-	
-	[HideInInspector]
-	public float NodeHeightDisplacement;
+	public int goalX = 2;
+	public int goalY = 3;
 	
 	// non-linear visualization, this is the cost value where the visualization is max!
 	public float VisualizationCostMax = 100;
 	
 	// scaling for the gizmo spheres
-	public float VisualizationScale = 1;
+	public float VisualizationScale = 0.5f;
+	
+	#endregion
+	
+	
+	#region Variables
+	
+	public List<Node> OptimalPath = new List<Node>();
 	
 	// Hexagonal grid!
 	Node[][] nodes;
 	
 	// stores NodeWidth value to check for changes
+	// used for grid redefinition when width is changed in editor
 	float varWidth = 0;
 	
+	#endregion
+	
+	
 	#region Initialization
+	
 	public void Awake()
 	{
 		Initialize(false);
 	}
 	
-	// NodeHeight = 1 / cos(30deg) * NodeWidth = 4/6 * sqrt(3) * NodeWidth
-	const float heightDisplacementRatio = 0.86602540378443864676372317075294f;
-	// calculate hexagon height displacement from given width
-	public float GetNodeHeightDisplacement(float nodeWidth)
-	{
-		return heightDisplacementRatio * nodeWidth;	
-	}
-	
 	void Initialize(bool dummyValues)
 	{
-		NodeHeightDisplacement = GetNodeHeightDisplacement(NodeWidth);
-		varWidth = NodeWidth;
+		if(!d) d = GameObject.FindObjectOfType(typeof(HexMapDefinition)) as HexMapDefinition;
+		if(!d) Debug.LogError("Missing instance of HexMapDefinition in scene!");
+		
+		varWidth = d.NodeWidth;
 		
 		int currentID = 0;
 		
-		nodes = new Node[NodeCountX][];
-		for(int i = 0; i < NodeCountX; i++)
+		nodes = new Node[d.NodeCountX][];
+		for(int i = 0; i < d.NodeCountX; i++)
 		{
-			nodes[i] = new Node[NodeCountY];
-			for(int j = 0; j < NodeCountY; j++)
+			nodes[i] = new Node[d.NodeCountY];
+			for(int j = 0; j < d.NodeCountY; j++)
 			{
 				nodes[i][j] = new Node()
 				{
@@ -84,7 +84,7 @@ public class HexMap : MonoBehaviour
 			}
 		}
 		
-		OptimalPath = GetOptimalPath<Unit>(this, gameObject.GetComponent<Unit>(), this.getGoalNode());
+		//OptimalPath = GetOptimalPath<Unit>(this, gameObject.GetComponent<Unit>(), this.getGoalNode());
 	}
 	
 	// Breadth-First-Search based grid cost initialization
@@ -120,9 +120,9 @@ public class HexMap : MonoBehaviour
 	public Vector3 GetNodePosition(int x, int y)
 	{
 		return new Vector3(
-			Position.x + NodeWidth * (x + y%2 * 0.5f),
-			Position.y,
-			Position.z + y * NodeHeightDisplacement
+			d.Position.x + d.NodeWidth * (x + y%2 * 0.5f),
+			d.Position.y,
+			d.Position.z + y * d.NodeHeightDisplacement
 		);
 	}
 	
@@ -132,12 +132,12 @@ public class HexMap : MonoBehaviour
 	}
 	public NodeIndex GetNodeIndex(float x, float z)
 	{
-		x -= Position.x;
-		z -= Position.z;
+		x -= d.Position.x;
+		z -= d.Position.z;
 		
 		NodeIndex index;
-		index.Y = Mathf.RoundToInt(z / NodeHeightDisplacement);
-		index.X = Mathf.RoundToInt(x / NodeWidth - 0.5f * (index.Y%2));
+		index.Y = Mathf.RoundToInt(z / d.NodeHeightDisplacement);
+		index.X = Mathf.RoundToInt(x / d.NodeWidth - 0.5f * (index.Y%2));
 		
 		return index;
 	}
@@ -145,8 +145,8 @@ public class HexMap : MonoBehaviour
 	// Get node by ID.
 	public Node GetNode(int id)
 	{
-		int y = id % NodeCountY;
-		int x = (id-y) / NodeCountY;
+		int y = id % d.NodeCountY;
+		int x = (id-y) / d.NodeCountY;
 		return GetNode(x, y);
 		//return GetNode((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY));
 	}
@@ -168,9 +168,9 @@ public class HexMap : MonoBehaviour
 	{
 		List<Node> nodes = new List<Node>();
 		
-		for(int x = 0; x < m.NodeCountX; x++)
+		for(int x = 0; x < m.d.NodeCountX; x++)
 		{
-			for(int y = 0; y < m.NodeCountY; y++)
+			for(int y = 0; y < m.d.NodeCountY; y++)
 			{
 				Node n = m.nodes[x][y];
 				if(o.IsInRange(m.GetNodePosition(n.Index)) >= 0)
@@ -183,7 +183,13 @@ public class HexMap : MonoBehaviour
 		return nodes;
 	}
 	
-	public IEnumerable<Node> NeighboursOf(int id) { return NeighboursOf((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY)); }
+	public IEnumerable<Node> NeighboursOf(int id)
+	{
+		int y = id % d.NodeCountY;
+		int x = (id-y) / d.NodeCountY;
+		return NeighboursOf(x, y);
+		//return NeighboursOf((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY));
+	}
 	public IEnumerable<Node> NeighboursOf(Node n) { return NeighboursOf(n.Index.X, n.Index.Y); }
 	public IEnumerable<Node> NeighboursOf(NodeIndex i) { return NeighboursOf(i.X, i.Y); }
 	public IEnumerable<Node> NeighboursOf(int x, int y)
@@ -204,9 +210,9 @@ public class HexMap : MonoBehaviour
 			// y-1, x
 			// y-1, x-1
 			if(xMin >= 0) 						yield return nodes[x-1][y];
-			if(xMin >= 0 && yPlus < NodeCountY) yield return nodes[x-1][y+1];
-			if(yPlus < NodeCountY) 				yield return nodes[x]  [y+1];
-			if(xPlus < NodeCountX) 				yield return nodes[x+1][y];
+			if(xMin >= 0 && yPlus < d.NodeCountY) yield return nodes[x-1][y+1];
+			if(yPlus < d.NodeCountY) 				yield return nodes[x]  [y+1];
+			if(xPlus < d.NodeCountX) 				yield return nodes[x+1][y];
 			if(yMin >= 0) 						yield return nodes[x]  [y-1];
 			if(xMin >= 0 && yMin >= 0)		 	yield return nodes[x-1][y-1];
 		}
@@ -220,10 +226,10 @@ public class HexMap : MonoBehaviour
 			// y-1, x+1
 			// y-1, x
 			if(xMin >= 0) 								 yield return nodes[x-1][y];
-			if(yPlus < NodeCountY) 						 yield return nodes[x][y+1];
-			if(xPlus < NodeCountX && yPlus < NodeCountY) yield return nodes[x+1]  [y+1];
-			if(xPlus < NodeCountX) 						 yield return nodes[x+1][y];
-			if(xPlus < NodeCountX && yMin >= 0) 		 yield return nodes[x+1]  [y-1];
+			if(yPlus < d.NodeCountY) 						 yield return nodes[x][y+1];
+			if(xPlus < d.NodeCountX && yPlus < d.NodeCountY) yield return nodes[x+1]  [y+1];
+			if(xPlus < d.NodeCountX) 						 yield return nodes[x+1][y];
+			if(xPlus < d.NodeCountX && yMin >= 0) 		 yield return nodes[x+1]  [y-1];
 			if(yMin >= 0) 								 yield return nodes[x][y-1];
 		}
 	}
@@ -238,9 +244,9 @@ public class HexMap : MonoBehaviour
 	/// </summary>
 	public static void ModifyCellsInRange<T>(HexMap m, BasicObject o, Func<int, T, int> Modifier, T metaData)
 	{
-		for(int i = 0; i < m.NodeCountX; i++)
+		for(int i = 0; i < m.d.NodeCountX; i++)
 		{
-			for(int j = 0; j < m.NodeCountY; j++)
+			for(int j = 0; j < m.d.NodeCountY; j++)
 			{
 				NodeIndex n = new NodeIndex(i, j);
 				if(o.IsInRange(m.GetNodePosition(n)) >= 0)
@@ -276,8 +282,8 @@ public class HexMap : MonoBehaviour
 	// Find the optimal path through the given HexMap m for given unit c to goal Node g, using Dijkstra's.
 	public static List<Node> GetOptimalPath<T>(HexMap m, T c, Node g) where T : BasicObject
 	{
-		int[] distances = new int[m.NodeCountX * m.NodeCountY];
-		int[] previous = new int[m.NodeCountX * m.NodeCountY];
+		int[] distances = new int[m.d.NodeCountX * m.d.NodeCountY];
+		int[] previous = new int[m.d.NodeCountX * m.d.NodeCountY];
 		
 		for(int i = 0; i < distances.Length; ++i)
 		{
@@ -347,22 +353,26 @@ public class HexMap : MonoBehaviour
 	
 	void OnDrawGizmosSelected()
 	{
-		if(nodes == null 
-			|| NodeCountX > nodes.Length 
-			|| NodeCountY > nodes[0].Length
-			|| varWidth != NodeWidth)
+		if(DrawGrid)
 		{
-			Initialize(dummyData);
-		}
-		
-		for(int i = 0; i < NodeCountX; i++)
-		{
-			for(int j = 0; j < NodeCountY; j++)
+			if(nodes == null 
+				|| !d
+				|| d.NodeCountX > nodes.Length 
+				|| d.NodeCountY > nodes[0].Length
+				|| varWidth != d.NodeWidth)
 			{
-				float cost = nodes[i][j].Cost;
-				float costRatio = cost > 1 ? (Mathf.Log10(cost/(VisualizationCostMax*.1f))*.5f+.5f) : 0;
-				Gizmos.color = Visualizer.HSVtoRGB(360 - costRatio*360, 1, 1);
-				Gizmos.DrawSphere(GetNodePosition(i, j), .01f + 0.5f * costRatio * VisualizationScale);
+				Initialize(DummyData);
+			}
+			
+			for(int i = 0; i < d.NodeCountX; i++)
+			{
+				for(int j = 0; j < d.NodeCountY; j++)
+				{
+					float cost = nodes[i][j].Cost;
+					float costRatio = cost > 1 ? (Mathf.Log10(cost/(VisualizationCostMax*.1f))*.5f+.5f) : 0;
+					Gizmos.color = Visualizer.HSVtoRGB(360 - costRatio*360, 1, 1);
+					Gizmos.DrawSphere(GetNodePosition(i, j), .01f + 0.5f * costRatio * VisualizationScale);
+				}
 			}
 		}
 		
