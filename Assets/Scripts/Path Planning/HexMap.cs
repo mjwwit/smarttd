@@ -17,6 +17,8 @@ public class HexMap : MonoBehaviour
 	public int goalX = 9;
 	public int goalY = 9;
 	
+	public List<Node> OptimalPath = new List<Node>();
+	
 	[HideInInspector]
 	public float NodeHeightDisplacement;
 	
@@ -81,6 +83,8 @@ public class HexMap : MonoBehaviour
 				ModifyCellsInRange<Tower>(this, t, HexMap.GridModifier_AddTowerDamage, t);
 			}
 		}
+		
+		OptimalPath = GetOptimalPath<Unit>(this, gameObject.GetComponent<Unit>(), this.getGoalNode());
 	}
 	
 	// Breadth-First-Search based grid cost initialization
@@ -264,7 +268,7 @@ public class HexMap : MonoBehaviour
 	#region Analyzation
 	
 	// Find the optimal path through the given HexMap m for given unit c to goal Node g, using Dijkstra's.
-	public static List<Node> getOptimalPath<T>(HexMap m, T c, Node g) where T : BasicObject
+	public static List<Node> GetOptimalPath<T>(HexMap m, T c, Node g) where T : BasicObject
 	{
 		int[] distances = new int[m.NodeCountX * m.NodeCountY];
 		int[] previous = new int[m.NodeCountX * m.NodeCountY];
@@ -353,6 +357,15 @@ public class HexMap : MonoBehaviour
 				float costRatio = cost > 1 ? (Mathf.Log10(cost/(VisualizationCostMax*.1f))*.5f+.5f) : 0;
 				Gizmos.color = Visualizer.HSVtoRGB(360 - costRatio*360, 1, 1);
 				Gizmos.DrawSphere(GetNodePosition(i, j), .01f + 0.5f * costRatio * VisualizationScale);
+			}
+		}
+		
+		Gizmos.color = Color.white;
+		if(OptimalPath.Count != 0)
+		{
+			for(int i = 0; i < OptimalPath.Count - 1; ++i)
+			{
+				Gizmos.DrawLine(GetNodePosition(OptimalPath[i]), GetNodePosition(OptimalPath[i+1]));
 			}
 		}
 	}
