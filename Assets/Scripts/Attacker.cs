@@ -48,7 +48,7 @@ public struct Line
 // Static, for ease of programming. Not going to bother with fancy structures! Practicality is our friend.
 public static class Attacker
 {
-	public static Vector3 GoalDirection = Vector3.Normalize(new Vector3(1, 0, 0));
+	//public static Vector3 GoalDirection = Vector3.Normalize(new Vector3(1, 0, 0));
 	
 	public static Line Goal = new Line(
 		new Vector3(22.0f, 0.0f, 0),
@@ -81,7 +81,11 @@ public static class Attacker
 	{
 		return Goal.Distance2D(pos);
 	}
-	public static Vector3 ShortestVectorToGoal(Vector3 pos)
+	public static Vector3 ClosestPointOnGoal(Vector3 pos)
+	{
+		return Goal.ClosestPointOnLine(pos);
+	}
+	public static Vector3 VectorToGoal(Vector3 pos)
 	{
 		return Goal.ClosestPointOnLine(pos) - pos;
 	}

@@ -8,7 +8,10 @@ public class Unit : BasicObject
 	List<BasicObject> attackers;
 	List<BasicObject> defenders;
 	
+	List<BasicObject> knownDefenders;
+	
 	// grid-based pathfinding variables
+	HexMap map;
 	List<Node> path;
 	int cPathNode;
 	
@@ -17,8 +20,13 @@ public class Unit : BasicObject
 	protected override void Start ()
 	{
 		base.Start ();
+		
+		map = GetComponent<HexMap>();
 		cPathNode = 0;
+		
+		knownDefenders = new List<BasicObject>();
 	}
+	
 	protected override void Update ()
 	{
 		base.Update ();
@@ -29,6 +37,34 @@ public class Unit : BasicObject
 		// store units that are in range
 		attackers = FindAttackersInRange(this);
 		defenders = FindDefendersInRange(this);
+		
+		
+		// --------------------------------------------
+		// handle newly aqcuired information
+		
+		bool resetPath = false;
+		
+		// for each defender in range
+		foreach(BasicObject o in defenders)
+		{
+			// if it's already known, continue
+			if(knownDefenders.Contains(o)) continue;
+			
+			// if it's not, handle the new information
+			knownDefenders.Add(o);
+			if(o.GetType() == typeof(Tower))
+			{
+				bool relevantData = handleNewData(o as Tower);
+				if(relevantData) resetPath = true;
+			}
+		}
+		
+		// reset path if needed
+		if(resetPath) path = null;
+		
+		
+		// --------------------------------------------
+		// basic path planning
 		
 		// get goal position
 		Vector3 gridGoal = GetGridGoal(cPos);
@@ -42,7 +78,7 @@ public class Unit : BasicObject
 		{
 			// move towards ultimate goal
 			// set new difference vector and distance
-			diff = Attacker.ShortestVectorToGoal(cPos) - cPos;
+			diff = Attacker.VectorToGoal(cPos);
 			distance = diff.magnitude;
 		}
 		
@@ -52,6 +88,30 @@ public class Unit : BasicObject
 		// move unit towards its current goal
 		transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.deltaTime);
 	}
+	
+	#region New Data Handling
+	
+	/* --- Handling of newly aqcuired information. ---
+	 * These functions should return TRUE if the new data was relevant to this object (ie. for path planning).
+	*/
+	
+	// handles new tower information
+	bool handleNewData(Tower t)
+	{
+		map.ModifyCellsInRange<Tower>(t, GridMod_AddTower, t);
+		return true;
+	}
+	
+	// This function adds a tower's influence to the unit's hexmap data.
+	// Here we can scale it by how much the unit is affected by this particular turret, etcetera.
+	public int GridMod_AddTower(int cost, Tower t)
+	{
+		return cost += t.Damage * 10;
+	}
+	
+	#endregion
+	
+	#region Grid-based pathfinding
 	
 	Vector3 GetGridGoal(Vector3 currentPosition)
 	{
@@ -98,10 +158,12 @@ public class Unit : BasicObject
 	
 	public List<Node> GetPath()
 	{
-		// todo: execute pathfinding algorithm
+		if(!map) return null;
 		
-		return null;
+		return map.GetOptimalPath(this, Attacker.ClosestPointOnGoal(this.transform.position));
 	}
+	
+	#endregion
 	
 	public override void Die ()
 	{

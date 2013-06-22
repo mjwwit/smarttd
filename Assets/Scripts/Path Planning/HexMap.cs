@@ -8,11 +8,22 @@ public class HexMap : MonoBehaviour
 	
 	public HexMapDefinition d;
 	
+	// --------------------------------------
+	// GIZMO DRAWING variables.
+	
+	// re-initializes the grid when true and immediately sets the bool to false again
+	public bool ResetGrid = false;
+	
 	// draw grid ? 
 	public bool DrawGrid = true;
+	
 	// use pseudo-random data for drawing grid?
 	public bool DummyData = false;
 	
+	// --------------------------------------
+	
+	// goal definition
+	// maybe the goal should be defined in the unit instead, since this is just a utility class
 	public int goalX = 2;
 	public int goalY = 3;
 	
@@ -27,6 +38,8 @@ public class HexMap : MonoBehaviour
 	
 	#region Variables
 	
+	// since this is a grid-based utility class only, do this in the unit class?
+	// or define a pathfinder class, whatevs.
 	public List<Node> OptimalPath = new List<Node>();
 	
 	// Hexagonal grid!
@@ -41,7 +54,7 @@ public class HexMap : MonoBehaviour
 	
 	#region Initialization
 	
-	public void Awake()
+	public void Start()
 	{
 		Initialize(false);
 	}
@@ -72,17 +85,24 @@ public class HexMap : MonoBehaviour
 				currentID++;
 			}
 		}
+		
+		// Todo: --> How the grid is filled should be defined outside of this class.
+		
+		// experiments, not using this
+		/*
 		if(!dummyValues)
 		{
 			// Load values based on distance to goal
 			initNodeCost(nodes[goalX][goalY]);
 			
 			//DEBUG: Load values based on tower positions
-			foreach(Tower t in FindObjectsOfType(System.Type.GetType("Tower")))
-			{
-				ModifyCellsInRange<Tower>(this, t, HexMap.GridModifier_AddTowerDamage, t);
-			}
+			if(Defender.Towers != null)
+				foreach(Tower t in Defender.Towers)
+				{
+					ModifyCellsInRange<Tower>(this, t, HexMap.GridModifier_AddTowerDamage, t);
+				}
 		}
+		*/
 		
 		//OptimalPath = GetOptimalPath<Unit>(this, gameObject.GetComponent<Unit>(), this.getGoalNode());
 	}
@@ -126,6 +146,12 @@ public class HexMap : MonoBehaviour
 		);
 	}
 	
+	public NodeIndex GetNodeIndex(int id)
+	{
+		int y = id % d.NodeCountY;
+		int x = (id-y) / d.NodeCountY;
+		return new NodeIndex(x, y);
+	}
 	public NodeIndex GetNodeIndex(Vector3 pos)
 	{
 		return GetNodeIndex(pos.x, pos.z);
@@ -145,9 +171,8 @@ public class HexMap : MonoBehaviour
 	// Get node by ID.
 	public Node GetNode(int id)
 	{
-		int y = id % d.NodeCountY;
-		int x = (id-y) / d.NodeCountY;
-		return GetNode(x, y);
+		NodeIndex i = GetNodeIndex(id);
+		return GetNode(i.X, i.Y);
 		//return GetNode((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY));
 	}
 	public Node GetNode(Vector3 pos) { return GetNode(pos.x, pos.z); }
@@ -156,7 +181,16 @@ public class HexMap : MonoBehaviour
 		NodeIndex i = GetNodeIndex(x, z);
 		return nodes[i.X][i.Y];
 	}
-	public Node GetNode(int X, int Y) { return nodes[X][Y]; }
+	public Node GetNode(int X, int Y)
+	{
+		if(    X < 0
+			|| X >= d.NodeCountX
+			|| Y < 0
+			|| Y >= d.NodeCountY)
+			return null;
+		
+		return nodes[X][Y];
+	}
 	
 	public Node getGoalNode(){ return GetNode(goalX, goalY); }
 	
@@ -185,9 +219,8 @@ public class HexMap : MonoBehaviour
 	
 	public IEnumerable<Node> NeighboursOf(int id)
 	{
-		int y = id % d.NodeCountY;
-		int x = (id-y) / d.NodeCountY;
-		return NeighboursOf(x, y);
+		NodeIndex i = GetNodeIndex(id);
+		return NeighboursOf(i.X, i.Y);
 		//return NeighboursOf((int)Math.Floor((float)id / (float)NodeCountY), id - ((int)Math.Floor((float)id / (float)NodeCountY) * NodeCountY));
 	}
 	public IEnumerable<Node> NeighboursOf(Node n) { return NeighboursOf(n.Index.X, n.Index.Y); }
@@ -239,26 +272,34 @@ public class HexMap : MonoBehaviour
 	#region Cell Modification
 	
 	/// <summary>
-	/// Modifies the cells in range with a given Modifier function. 
+	/// Modifies the cells in range of a given object with a given Modifier function.
+	/// </summary>
+	public void ModifyCellsInRange<T>(BasicObject o, Func<int, T, int> modifier, T metaData)
+	{
+		ModifyCellsInRange<T>(this, o, modifier, metaData);
+	}
+	
+	/// <summary>
+	/// Modifies the cells in range of a given object with a given Modifier function. 
 	/// All cells are checked for whether they're in range, that can probably use some optimization.
 	/// </summary>
-	public static void ModifyCellsInRange<T>(HexMap m, BasicObject o, Func<int, T, int> Modifier, T metaData)
+	public static void ModifyCellsInRange<T>(HexMap m, BasicObject modObj, Func<int, T, int> modifier, T metaData)
 	{
 		for(int i = 0; i < m.d.NodeCountX; i++)
 		{
 			for(int j = 0; j < m.d.NodeCountY; j++)
 			{
 				NodeIndex n = new NodeIndex(i, j);
-				if(o.IsInRange(m.GetNodePosition(n)) >= 0)
+				if(modObj.IsInRange(m.GetNodePosition(n)) >= 0)
 				{
-					m.nodes[i][j].Cost = Modifier(m.nodes[i][j].Cost, metaData);
+					m.nodes[i][j].Cost = modifier(m.nodes[i][j].Cost, metaData);
 				}
 			}
 		}
 	}
 	
-	/* Modifier template: int Modifier( int cost );
-	 * Input is a BasicObject as metadata and the grid cell's current cost.
+	/* Modifier template: int Modifier( int cost, T metaData );
+	 * Input is the grid cell's current cost and any object as metadata.
 	 * Output is the new cell value.
 	 * 
 	 * Example usage:
@@ -279,9 +320,40 @@ public class HexMap : MonoBehaviour
 	
 	#region Analyzation
 	
-	// Find the optimal path through the given HexMap m for given unit c to goal Node g, using Dijkstra's.
-	public static List<Node> GetOptimalPath<T>(HexMap m, T c, Node g) where T : BasicObject
+	// Find the optimal path through the given HexMap m from start to goal.
+	public List<Node> GetOptimalPath(Vector3 start, Vector3 goal)
 	{
+		return GetOptimalPath(this, start, goal);
+	}
+	
+	// Find the optimal path through the given HexMap m for given unit o to goal.
+	public List<Node> GetOptimalPath(BasicObject o, Vector3 goal)
+	{
+		return GetOptimalPath(this, o.transform.position, goal);
+	}
+	// Find the optimal path through the given HexMap m for given unit c to goal Node g, using Dijkstra's.
+	public static List<Node> GetOptimalPath(HexMap m, BasicObject o, Node g)
+	{
+		return GetOptimalPath(m, o.transform.position, g.Position);
+	}
+	// Find the optimal path through the given HexMap m from start to goal.
+	public static List<Node> GetOptimalPath(HexMap m, Vector3 start, Vector3 goal)
+	{
+		Node s = m.GetNode(start);
+		Node g = m.GetNode(goal);
+		
+		// if one is null, it's not on the grid
+		// for now, return an empty list: we can't find a path!
+		// todo: use a gridnode as close as possible!
+		if(s == null)
+		{
+			return new List<Node>(0);
+		}
+		if(g == null)
+		{
+			return new List<Node>(0);
+		}
+		
 		int[] distances = new int[m.d.NodeCountX * m.d.NodeCountY];
 		int[] previous = new int[m.d.NodeCountX * m.d.NodeCountY];
 		
@@ -291,7 +363,7 @@ public class HexMap : MonoBehaviour
 			previous[i] = -1;
 		}
 		
-		int source = m.GetNode(new Vector3(c.transform.position.x, c.transform.position.y, c.transform.position.z)).ID;
+		int source = s.ID; //m.GetNode(new Vector3(c.transform.position.x, c.transform.position.y, c.transform.position.z)).ID;
 		distances[source] = 0;
 		
 		List<int> q = new List<int>();
@@ -355,12 +427,14 @@ public class HexMap : MonoBehaviour
 	{
 		if(DrawGrid)
 		{
-			if(nodes == null 
+			if( ResetGrid
+				|| nodes == null 
 				|| !d
 				|| d.NodeCountX > nodes.Length 
 				|| d.NodeCountY > nodes[0].Length
 				|| varWidth != d.NodeWidth)
 			{
+				ResetGrid = false;
 				Initialize(DummyData);
 			}
 			

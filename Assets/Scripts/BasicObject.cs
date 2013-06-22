@@ -236,11 +236,15 @@ public class BasicObject : MonoBehaviour
 	
 	public static float Criterion_DistanceToGoal(BasicObject obj)
 	{
+		return Attacker.DistanceToGoal(obj.transform.position);
+		
+		/* -- old method
 		// Project the object's position on the direction, bigger means it's closer to the goal.
 		float projectedDistance = Vector3.Dot(obj.transform.position, Attacker.GoalDirection);
 		
 		// Times -1, to make sure the end result is smaller for objects closer to the goal.
 		return -projectedDistance;
+		*/
 	}
 	
 	public static float Criterion_LowHP(BasicObject obj)
