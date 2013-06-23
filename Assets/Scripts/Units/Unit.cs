@@ -67,6 +67,7 @@ public class Unit : BasicObject
 		// basic path planning
 		
 		// get goal position
+		// can be used as a hint for a forces based method
 		Vector3 gridGoal = GetGridGoal(cPos);
 		
 		// get difference vector and distance
@@ -160,7 +161,10 @@ public class Unit : BasicObject
 	{
 		if(!map) return null;
 		
-		return map.GetOptimalPath(this, Attacker.ClosestPointOnGoal(this.transform.position));
+		Vector3 pos = this.transform.position;
+		Vector3 goal = Attacker.ClosestPointOnGoal(pos);
+		
+		return map.GetOptimalPath(pos, goal);
 	}
 	
 	#endregion
@@ -182,7 +186,7 @@ public class Unit : BasicObject
 		Gizmos.color = Color.white;
 		for(int i = 0; i < path.Count - 1; ++i)
 		{
-			Gizmos.DrawLine(map.GetNodePosition(path[i]), map.GetNodePosition(path[i+1]));
+			Gizmos.DrawLine(map.GetNodePosition(path[i]) + new Vector3(0, 0.01f, 0), map.GetNodePosition(path[i+1]) + new Vector3(0, 0.01f, 0));
 		}
 	}
 	

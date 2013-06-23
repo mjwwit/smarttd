@@ -10,8 +10,8 @@ public struct Line
 		this.w = end;
 	}
 	
-	// From http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-	// Return minimum distance between line segment vw and point p.
+	// From http://www.gamedev.net/topic/444154-closest-point-on-a-line/
+	// Returns the minimum distance between line segment vw and point p.
 	public float Distance2D(Vector3 p)
 	{
 		Vector3 t = ClosestPointOnLine(p);
@@ -33,26 +33,29 @@ public struct Line
 		*/
 	}
 	
+	// Returns the closest point from a given point on a given line.
 	public Vector3 ClosestPointOnLine(Vector3 p)
 	{
-		float l2 = Vector3.Dot(v, w);
-		if (l2 == 0.0) return v;
-		
-		// projected length
-		float t = Vector3.Dot(p - v, w - v) / l2;
-		if(t < 0.0f) return v;
-		else if(t > 1.0f) return w;
-		return v + t*(w-v);
+	    Vector3 AP = p-v;
+	    Vector3 AB = w-v;
+	    float ab2 = AB.x*AB.x + AB.y*AB.y + AB.z*AB.z;
+		if(ab2 == 0) return v;
+	    float ap_ab = AP.x*AB.x + AP.y*AB.y + AP.z*AB.z;
+	    float t = ap_ab / ab2;
+		if (t <= 0.0f) return v;
+		else if (t >= 1.0f) return w;
+	    return v + AB * t;
 	}
 }
+
 // Static, for ease of programming. Not going to bother with fancy structures! Practicality is our friend.
 public static class Attacker
 {
 	//public static Vector3 GoalDirection = Vector3.Normalize(new Vector3(1, 0, 0));
 	
 	public static Line Goal = new Line(
-		new Vector3(22.0f, 0.0f, 0),
-		new Vector3(22.0f, 0.0f, 0)
+		new Vector3(22.0f, 0.0f, -2),
+		new Vector3(22.0f, 0.0f, 2)
 	);
 	
 	public static List<BasicObject> Objects;

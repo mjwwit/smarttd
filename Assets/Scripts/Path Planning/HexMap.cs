@@ -24,8 +24,8 @@ public class HexMap : MonoBehaviour
 	
 	// goal definition
 	// maybe the goal should be defined in the unit instead, since this is just a utility class
-	public int goalX = 2;
-	public int goalY = 3;
+	//public int goalX = 2;
+	//public int goalY = 3;
 	
 	// non-linear visualization, this is the cost value where the visualization is max!
 	public float VisualizationCostMax = 100;
@@ -40,7 +40,7 @@ public class HexMap : MonoBehaviour
 	
 	// since this is a grid-based utility class only, do this in the unit class?
 	// or define a pathfinder class, whatevs.
-	public List<Node> OptimalPath = new List<Node>();
+	//public List<Node> OptimalPath = new List<Node>();
 	
 	// Hexagonal grid!
 	Node[][] nodes;
@@ -78,7 +78,7 @@ public class HexMap : MonoBehaviour
 				{
 					Index = new NodeIndex(i, j),
 					Position = GetNodePosition(i, j),
-					Cost = dummyValues ? Mathf.FloorToInt(UnityEngine.Random.value * 100) : 0,
+					Cost = dummyValues ? Mathf.FloorToInt(UnityEngine.Random.value * 100) : d.DefaultNodeCost,
 					ID = currentID
 				};
 				
@@ -192,7 +192,7 @@ public class HexMap : MonoBehaviour
 		return nodes[X][Y];
 	}
 	
-	public Node getGoalNode(){ return GetNode(goalX, goalY); }
+	//public Node getGoalNode(){ return GetNode(goalX, goalY); }
 	
 	public List<Node> GetCellsInRangeOf(BasicObject o)
 	{
@@ -390,7 +390,7 @@ public class HexMap : MonoBehaviour
 			q.Remove(minIndex);
 			
 			// Check if goal is reached
-			if(minIndex == m.getGoalNode().ID) break;
+			if(minIndex == g.ID) break;
 			
 			// Check if node is unreachable
 			if(minVal == int.MaxValue) break;
@@ -409,7 +409,7 @@ public class HexMap : MonoBehaviour
 		
 		// Reconstruct optimal path
 		List<Node> optimalPath = new List<Node>();
-		Node cn = m.getGoalNode();
+		Node cn = g;
 		while(previous[cn.ID] != -1)
 		{
 			optimalPath.Insert(0, cn);
