@@ -17,6 +17,15 @@ public class Unit : BasicObject
 	
 	public float PositionReachedMargin = .3f;
 	
+	[HideInInspector]
+	public Vector3 velocity;
+	[HideInInspector]
+	public Vector3 totalForce;
+	
+	// influences how easily the object changes to new directions
+	// lower mass makes for an easier change in velocity
+	public float Mass = 1;
+	
 	protected override void Start ()
 	{
 		base.Start ();
@@ -25,6 +34,9 @@ public class Unit : BasicObject
 		cPathNode = 0;
 		
 		knownDefenders = new List<BasicObject>();
+		
+		velocity = Vector3.zero;
+		totalForce = Vector3.zero;
 	}
 	
 	protected override void Update ()
@@ -42,25 +54,7 @@ public class Unit : BasicObject
 		// --------------------------------------------
 		// handle newly aqcuired information
 		
-		bool resetPath = false;
-		
-		// for each defender in range
-		foreach(BasicObject o in defenders)
-		{
-			// if it's already known, continue
-			if(knownDefenders.Contains(o)) continue;
-			
-			// if it's not, handle the new information
-			knownDefenders.Add(o);
-			if(o.GetType() == typeof(Tower))
-			{
-				bool relevantData = handleNewData(o as Tower);
-				if(relevantData) resetPath = true;
-			}
-		}
-		
-		// reset path if needed
-		if(resetPath) path = null;
+		handleNewData();
 		
 		
 		// --------------------------------------------
@@ -86,13 +80,77 @@ public class Unit : BasicObject
 		// normalize to direction
 		diff /= distance > 0 ? distance : 1;
 		
-		// move unit towards its current goal
-		transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.deltaTime);
+		Vector3 goalDesiredVelocity = diff * Mathf.Min(distance, MovementSpeed * Time.deltaTime);
+		Vector3 goalForce = goalDesiredVelocity - velocity;
+		
+		
+		totalForce = Vector3.zero;
+		
+		// goal vector component
+	 	totalForce += goalForce * 0.05f;
+		
+		// velocity
+		velocity += totalForce / Mass;
+		
+		// clamp to maximum speed
+		velocity = Vector3.ClampMagnitude(velocity, MovementSpeed);
+		
+		// move unit
+		transform.position += velocity;
+		
+		//transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.deltaTime);
 	}
+	
+	#region Flocking
+	
+	/*
+	public float SeparationDistance = 1;
+	public float SeparationStrength = 0.2f;
+	public float AlignmentStrength;
+	
+	Vector3 getFlockingVector()
+	{
+		Vector3 v = Vector3.zero;
+		foreach(BasicObject a in attackers)
+		{
+			float dist = DistanceTo(a);
+			if(dist < SeparationDistance)
+			{
+				v += SeparationStrength * (this.transform.position - a.transform.position)/dist;
+			}
+		}
+		return v;
+	}
+	*/
+	
+	#endregion
 	
 	#region New Data Handling
 	
-	/* --- Handling of newly aqcuired information. ---
+	void handleNewData()
+	{
+		bool resetPath = false;
+		
+		// for each defender in range
+		foreach(BasicObject o in defenders)
+		{
+			// if it's already known, continue
+			if(knownDefenders.Contains(o)) continue;
+			
+			// if it's not, handle the new information
+			knownDefenders.Add(o);
+			if(o.GetType() == typeof(Tower))
+			{
+				bool relevantData = handleNewData(o as Tower);
+				if(relevantData) resetPath = true;
+			}
+		}
+		
+		// reset path if needed
+		if(resetPath) path = null;
+	}
+	
+	/* --- Functions handling newly aqcuired information. ---
 	 * These functions should return TRUE if the new data was relevant to this object (ie. for path planning).
 	*/
 	
@@ -112,7 +170,7 @@ public class Unit : BasicObject
 	
 	#endregion
 	
-	#region Grid-based pathfinding
+	#region Grid-based path planning
 	
 	Vector3 GetGridGoal(Vector3 currentPosition)
 	{
