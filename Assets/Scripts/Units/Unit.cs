@@ -183,7 +183,7 @@ public class Unit : BasicObject
 		
 		if(path == null || path.Count <= 0) return;
 		
-		Gizmos.color = Color.white;
+		Gizmos.color = Color.green;
 		for(int i = 0; i < path.Count - 1; ++i)
 		{
 			Gizmos.DrawLine(map.GetNodePosition(path[i]) + new Vector3(0, 0.01f, 0), map.GetNodePosition(path[i+1]) + new Vector3(0, 0.01f, 0));
