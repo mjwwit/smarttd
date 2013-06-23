@@ -9,6 +9,7 @@ public class HexMapDefinition : MonoBehaviour
 	public int NodeCountX = 30;
 	public int NodeCountY = 6;
 	
+	public int DefaultNodeCost = 1;
 	public float NodeWidth = 1;
 	
 	// NodeHeight = 1 / cos(30deg) * NodeWidth = 4/6 * sqrt(3) * NodeWidth
