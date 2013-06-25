@@ -80,37 +80,40 @@ public class Unit : BasicObject
 		// normalize to direction
 		diff /= distance > 0 ? distance : 1;
 		
-		Vector3 goalDesiredVelocity = diff * Mathf.Min(distance, MovementSpeed * Time.deltaTime);
+		// maybe GoalForceStrength should be multiplied with desired velocity instead of goalForce ??
+		Vector3 goalDesiredVelocity = diff * MovementSpeed;
 		Vector3 goalForce = goalDesiredVelocity - velocity;
 		
 		
 		totalForce = Vector3.zero;
 		
 		// goal vector component
-	 	totalForce += goalForce * 0.05f;
+	 	totalForce += goalForce * GoalForceStrength;
 		
 		// apply flocking force
-		totalForce += getFlockingVector();
+		totalForce += getFlockingVector() * FlockingStrength;
 		
 		// velocity
-		velocity += totalForce / Mass;
+		velocity += totalForce / Mass * Time.deltaTime;
 		
 		// clamp to maximum speed
 		velocity = Vector3.ClampMagnitude(velocity, MovementSpeed);
 		
 		// move unit
-		transform.position += velocity;
+		transform.position += velocity * Time.deltaTime;
 		
 		//transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.deltaTime);
 	}
 	
 	#region Flocking
 	
+	public float GoalForceStrength = 3.0f;
+	public float FlockingStrength = 2.0f;
 	public float SeparationDistance = 1.5f;
-	public float SeparationStrength = 0.0003f;
+	public float SeparationStrength = 3.0f;
 	
 	public float CohesionDistance = 5.0f;
-	public float CohesionStrength = 0.0001f;
+	public float CohesionStrength = 1.0f;
 	
 	public float AlignmentStrength;
 	
@@ -120,18 +123,28 @@ public class Unit : BasicObject
 		foreach(BasicObject a in attackers)
 		{				
 			if(this == a) { continue; }
+			
+			Vector3 vAdd = Vector3.zero;
 						
 			float dist = DistanceTo(a);
+			Vector3 dir = (this.transform.position - a.transform.position) / dist;
 			if(dist < CohesionDistance)
 			{
-				v += -CohesionStrength * (this.transform.position - a.transform.position).normalized;
+				vAdd += -CohesionStrength * dir;
 				if(dist < SeparationDistance)
 				{
-					v += SeparationStrength * (this.transform.position - a.transform.position).normalized;
+					vAdd += SeparationStrength * dir;
 				}
 			}
+			
+			float baseInfluence = 0.5f;
+			float directionInfluence = 0.5f;
+			float influence = baseInfluence + directionInfluence * (1 + -Vector3.Dot(velocity.normalized, dir))*.5f;
+			//vAdd *= influence;
+			
+			v+= vAdd;
 		}
-
+		
 		return v;
 	}
 	
