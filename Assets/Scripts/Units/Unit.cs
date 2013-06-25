@@ -89,6 +89,9 @@ public class Unit : BasicObject
 		// goal vector component
 	 	totalForce += goalForce * 0.05f;
 		
+		// apply flocking force
+		totalForce += getFlockingVector();
+		
 		// velocity
 		velocity += totalForce / Mass;
 		
@@ -103,7 +106,6 @@ public class Unit : BasicObject
 	
 	#region Flocking
 	
-	/*
 	public float SeparationDistance = 1;
 	public float SeparationStrength = 0.2f;
 	public float AlignmentStrength;
@@ -112,16 +114,18 @@ public class Unit : BasicObject
 	{
 		Vector3 v = Vector3.zero;
 		foreach(BasicObject a in attackers)
-		{
+		{				
+			if(this == a) { continue; }
+						
 			float dist = DistanceTo(a);
 			if(dist < SeparationDistance)
 			{
-				v += SeparationStrength * (this.transform.position - a.transform.position)/dist;
+				v += SeparationStrength * (this.transform.position - a.transform.position).normalized;
 			}
 		}
+
 		return v;
 	}
-	*/
 	
 	#endregion
 	
