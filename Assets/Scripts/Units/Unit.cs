@@ -106,8 +106,12 @@ public class Unit : BasicObject
 	
 	#region Flocking
 	
-	public float SeparationDistance = 1;
-	public float SeparationStrength = 0.2f;
+	public float SeparationDistance = 1.5f;
+	public float SeparationStrength = 0.0003f;
+	
+	public float CohesionDistance = 5.0f;
+	public float CohesionStrength = 0.0001f;
+	
 	public float AlignmentStrength;
 	
 	Vector3 getFlockingVector()
@@ -118,9 +122,13 @@ public class Unit : BasicObject
 			if(this == a) { continue; }
 						
 			float dist = DistanceTo(a);
-			if(dist < SeparationDistance)
+			if(dist < CohesionDistance)
 			{
-				v += SeparationStrength * (this.transform.position - a.transform.position).normalized;
+				v += -CohesionStrength * (this.transform.position - a.transform.position).normalized;
+				if(dist < SeparationDistance)
+				{
+					v += SeparationStrength * (this.transform.position - a.transform.position).normalized;
+				}
 			}
 		}
 
