@@ -84,19 +84,23 @@ public class BasicObject : MonoBehaviour
 	#region Distance
 	public float DistanceTo(BasicObject toObj)
 	{
-		return Distance(this, toObj.transform.position);
+		return Distance(this.transform.position, toObj.transform.position);
 	}
 	public float DistanceTo(Vector3 toPos)
 	{
-		return Distance(this, toPos);
+		return Distance(this.transform.position, toPos);
 	}
 	public static float Distance(BasicObject fromObj, BasicObject toObj)
 	{
-		return Distance(fromObj, toObj.transform.position);
+		return Distance(fromObj.transform.position, toObj.transform.position);
 	}
 	public static float Distance(BasicObject fromObj, Vector3 toPos)
 	{
-		return Vector3.Distance(fromObj.transform.position, toPos);
+		return Distance(fromObj.transform.position, toPos);
+	}
+	public static float Distance(Vector3 fromPos, Vector3 toPos)
+	{
+		return Vector3.Distance(fromPos, toPos);
 	}
 	#endregion
 	
@@ -140,30 +144,41 @@ public class BasicObject : MonoBehaviour
 			return Mathf.Max(0, distance);
 		else return -1;
 	}
+	public static float IsInRange(Vector3 fromPos, float range, BasicObject toObj)
+	{
+		return IsInRange(fromPos, range, toObj.transform.position);
+	}
+	public static float IsInRange(Vector3 fromPos, float range, Vector3 toPos)
+	{
+		// determine distance between objects
+		float distance = Distance(fromPos, toPos);
+		
+		// check if the object is in range or not
+		if( range >= distance )
+			return distance;
+		else return -1;
+	}
 	#endregion
 	
 	#region FindInRange
 	public static List<BasicObject> FindAttackersInRange( BasicObject obj )
 	{
-		List<BasicObject> objects = new List<BasicObject>();
-		foreach( BasicObject attackerObject in Attacker.Objects )
-		{
-			// add to list if within range
-			if( IsInRange(obj, attackerObject) >= 0 )
-				objects.Add(attackerObject);
-		}
-		return objects;
+		return FindAllInRange<BasicObject>( obj.transform.position, obj.RangeOfView, Attacker.Objects );
 	}
 	public static List<BasicObject> FindDefendersInRange( BasicObject obj )
 	{
-		List<BasicObject> objects = new List<BasicObject>();
-		foreach( BasicObject defenderObject in Defender.Objects )
+		return FindAllInRange<BasicObject>( obj.transform.position, obj.RangeOfView, Defender.Objects );
+	}
+	public static List<T> FindAllInRange<T>( Vector3 position, float range, List<T> objects ) where T : BasicObject
+	{
+		List<T> objectsInRange = new List<T>();
+		foreach( T obj in objects )
 		{
 			// add to list if within range
-			if( IsInRange(obj, defenderObject) >= 0 )
-				objects.Add(defenderObject);
+			if( IsInRange(position, range, obj) >= 0 )
+				objectsInRange.Add(obj);
 		}
-		return objects;
+		return objectsInRange;
 	}
 	
 	public static BasicObject FindClosestAttackerInRange( BasicObject obj )
@@ -176,6 +191,10 @@ public class BasicObject : MonoBehaviour
 	}
 	public static T FindClosestInRange<T>( BasicObject obj, List<T> objects ) where T : BasicObject
 	{
+		return FindClosestInRange<T>( obj.transform.position, obj.RangeOfView, objects );
+	}
+	public static T FindClosestInRange<T>( Vector3 position, float range, List<T> objects ) where T : BasicObject
+	{
 		T closestObject = null;
 		float closestObjectDistance = float.MaxValue;
 		
@@ -183,7 +202,7 @@ public class BasicObject : MonoBehaviour
 		
 		foreach( T targetObj in objects )
 		{
-			distance = IsInRange(obj, targetObj);
+			distance = IsInRange(position, range, targetObj.transform.position);
 			
 			// store if within range and closer than the current closest
 			if( distance >= 0 && distance < closestObjectDistance )

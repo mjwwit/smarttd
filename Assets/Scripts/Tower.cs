@@ -56,13 +56,14 @@ public class Tower : BasicObject
 		drawRange ();
 	}
 	
-	void Fire()
+	protected virtual void Fire()
 	{
 		// we might want to fire a projectile here or something in the future
+		// and move this code to the projectile on impact
 		CurrentTarget.TakeDamage(Damage);	
 	}
 	
-	void AcquireTarget()
+	protected virtual void AcquireTarget()
 	{
 		// target the unit closest to the goal
 		CurrentTarget = FindBestSuitedObjectInRange<Unit>(

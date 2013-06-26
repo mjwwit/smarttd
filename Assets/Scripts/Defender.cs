@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-// Static, for ease of programming. Not going to bother with fancy structures! Practicality is our friend.
 public static class Defender
 {
 	public static List<BasicObject> Objects;

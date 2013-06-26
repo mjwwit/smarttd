@@ -18,19 +18,6 @@ public struct Line
 		t.y = 0;
 		p.y = 0;
 		return Vector3.Distance(t, p);
-		
-		/*
-		const float l2 = Vector3.Dot(v, w);  // i.e. |w-v|^2 -  avoid a sqrt
-		if (l2 == 0.0f) return Vector3.Distance(p, v);   // v == w case
-		// Consider the line extending the segment, parameterized as v + t (w - v).
-		// We find projection of point p onto the line. 
-		// It falls where t = [(p-v) . (w-v)] / |w-v|^2
-		const float t = dot(p - v, w - v) / l2;
-		if (t < 0.0f) return Vector3.Distance(p, v);       // Beyond the 'v' end of the segment
-		else if (t > 1.0f) return Vector3.Distance(p, w);  // Beyond the 'w' end of the segment
-		const Vector3 projection = v + t * (w - v);  // Projection falls on the segment
-		return Vector3.Distance(p, projection);
-		*/
 	}
 	
 	// Returns the closest point from a given point on a given line.
@@ -48,7 +35,6 @@ public struct Line
 	}
 }
 
-// Static, for ease of programming. Not going to bother with fancy structures! Practicality is our friend.
 public static class Attacker
 {
 	//public static Vector3 GoalDirection = Vector3.Normalize(new Vector3(1, 0, 0));

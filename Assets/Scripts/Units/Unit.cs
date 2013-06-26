@@ -15,7 +15,7 @@ public class Unit : BasicObject
 	List<Node> path;
 	int cPathNode;
 	
-	public float PositionReachedMargin = .3f;
+	public float PositionReachedMargin = .5f;
 	
 	[HideInInspector]
 	public Vector3 velocity;
@@ -25,6 +25,17 @@ public class Unit : BasicObject
 	// influences how easily the object changes to new directions
 	// lower mass makes for an easier change in velocity
 	public float Mass = 1;
+	
+	// force parameters
+	public float GoalForceStrength = 3.0f;
+	public float FlockingStrength = 2.0f;
+	public float SeparationDistance = 1.5f;
+	public float SeparationStrength = 3.0f;
+	
+	public float CohesionDistance = 5.0f;
+	public float CohesionStrength = 1.0f;
+	
+	public float AlignmentStrength;
 	
 	protected override void Start ()
 	{
@@ -59,44 +70,19 @@ public class Unit : BasicObject
 		
 		// --------------------------------------------
 		// basic path planning
-		
-		// get goal position
-		// can be used as a hint for a forces based method
-		Vector3 gridGoal = GetGridGoal(cPos);
-		
-		// get difference vector and distance
-		Vector3 diff = gridGoal - cPos;
-		float distance = diff.magnitude;
-		
-		// if we already reached this position
-		if(distance < PositionReachedMargin)
-		{
-			// move towards ultimate goal
-			// set new difference vector and distance
-			diff = Attacker.VectorToGoal(cPos);
-			distance = diff.magnitude;
-		}
-		
-		// normalize to direction
-		diff /= distance > 0 ? distance : 1;
-		
-		// maybe GoalForceStrength should be multiplied with desired velocity instead of goalForce ??
-		Vector3 goalDesiredVelocity = diff * MovementSpeed;
-		Vector3 goalForce = goalDesiredVelocity - velocity;
-		
-		
 		totalForce = Vector3.zero;
 		
 		// goal vector component
-	 	totalForce += goalForce * GoalForceStrength;
+	 	totalForce += getGoalVector(cPos) * GoalForceStrength;
 		
 		// apply flocking force
-		totalForce += getFlockingVector() * FlockingStrength;
+		totalForce += getFlockingVector(cPos) * FlockingStrength;
 		
 		// velocity
 		velocity += totalForce / Mass * Time.deltaTime;
 		
 		// clamp to maximum speed
+		//velocity /= velocity.magnitude * MovementSpeed;
 		velocity = Vector3.ClampMagnitude(velocity, MovementSpeed);
 		
 		// move unit
@@ -107,17 +93,7 @@ public class Unit : BasicObject
 	
 	#region Flocking
 	
-	public float GoalForceStrength = 3.0f;
-	public float FlockingStrength = 2.0f;
-	public float SeparationDistance = 1.5f;
-	public float SeparationStrength = 3.0f;
-	
-	public float CohesionDistance = 5.0f;
-	public float CohesionStrength = 1.0f;
-	
-	public float AlignmentStrength;
-	
-	Vector3 getFlockingVector()
+	Vector3 getFlockingVector(Vector3 cPos)
 	{
 		Vector3 v = Vector3.zero;
 		foreach(BasicObject a in attackers)
@@ -127,19 +103,40 @@ public class Unit : BasicObject
 			Vector3 vAdd = Vector3.zero;
 						
 			float dist = DistanceTo(a);
-			Vector3 dir = (this.transform.position - a.transform.position) / dist;
-			if(dist < CohesionDistance)
+			Vector3 dir = (cPos - a.transform.position) / dist;
+			
+			// if we're not being targeted by an area effect, enable cohesion
+			bool targetedByAoE = false;
+			foreach(BasicObject b in defenders)
+			{
+				Tower_AoE t = b as Tower_AoE;
+				if(t && t.CurrentTarget == this) 
+					targetedByAoE = true;
+			}
+			if(!targetedByAoE && dist < CohesionDistance)
 			{
 				vAdd += -CohesionStrength * dir;
-				if(dist < SeparationDistance)
-				{
-					vAdd += SeparationStrength * dir;
-				}
 			}
 			
-			float baseInfluence = 0.5f;
-			float directionInfluence = 0.5f;
-			float influence = baseInfluence + directionInfluence * (1 + -Vector3.Dot(velocity.normalized, dir))*.5f;
+			// for each object in range that's being targeted, add separation force
+			foreach(BasicObject b in defenders)
+			{
+				Tower_AoE t = b as Tower_AoE;
+				if(!t) continue;
+				
+				if(a == t.CurrentTarget && dist < t.AreaOfEffectRadius)
+					vAdd += SeparationStrength * dir;
+			}
+			
+			// standard separation force
+			if(dist < SeparationDistance)
+			{
+				vAdd += SeparationStrength * dir;
+			}
+			
+			//float baseInfluence = 0.5f;
+			//float directionInfluence = 0.5f;
+			//float influence = baseInfluence + directionInfluence * (1 + -Vector3.Dot(velocity.normalized, dir))*.5f;
 			//vAdd *= influence;
 			
 			v+= vAdd;
@@ -164,7 +161,7 @@ public class Unit : BasicObject
 			
 			// if it's not, handle the new information
 			knownDefenders.Add(o);
-			if(o.GetType() == typeof(Tower))
+			if(o as Tower)
 			{
 				bool relevantData = handleNewData(o as Tower);
 				if(relevantData) resetPath = true;
@@ -190,12 +187,41 @@ public class Unit : BasicObject
 	// Here we can scale it by how much the unit is affected by this particular turret, etcetera.
 	public int GridMod_AddTower(int cost, Tower t)
 	{
-		return cost += t.Damage * 10;
+		return cost += Mathf.RoundToInt(t.Damage / t.AttackCooldown * 10);
 	}
 	
 	#endregion
 	
 	#region Grid-based path planning
+	
+	Vector3 getGoalVector(Vector3 cPos)
+	{
+		// get goal position
+		// can be used as a hint for a forces based method
+		Vector3 gridGoal = GetGridGoal(cPos);
+		
+		// get difference vector and distance
+		Vector3 diff = gridGoal - cPos;
+		float distance = diff.magnitude;
+		
+		// if we already reached this position
+		if(distance < PositionReachedMargin)
+		{
+			// move towards ultimate goal
+			// set new difference vector and distance
+			diff = Attacker.VectorToGoal(cPos);
+			distance = diff.magnitude;
+		}
+		
+		// normalize to direction
+		diff /= distance > 0 ? distance : 1;
+		
+		// maybe GoalForceStrength should be multiplied with desired velocity instead of goalForce ??
+		Vector3 goalDesiredVelocity = diff * MovementSpeed;
+		Vector3 goalForce = goalDesiredVelocity - velocity;
+		
+		return goalForce;
+	}
 	
 	Vector3 GetGridGoal(Vector3 currentPosition)
 	{
@@ -220,6 +246,14 @@ public class Unit : BasicObject
 		}
 		
 		Node n = path[cPathNode];
+		
+		// if the next node is closer
+		if(path.Count > cPathNode+1 
+			&& Distance(this, path[cPathNode].Position) > Distance(this, path[cPathNode+1].Position))
+		{
+			cPathNode++;
+			n = path[cPathNode];
+		}
 		
 		// if we're close to the node
 		if(DistanceTo(n.Position) < PositionReachedMargin)
