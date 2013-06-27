@@ -124,7 +124,7 @@ public class Unit : BasicObject
 				Tower_AoE t = b as Tower_AoE;
 				if(!t) continue;
 				
-				if(a == t.CurrentTarget && dist < t.AreaOfEffectRadius)
+				if(a == t.CurrentTarget && dist < t.AreaOfEffectRadius + 0.2f)
 					vAdd += SeparationStrength * dir;
 			}
 			
