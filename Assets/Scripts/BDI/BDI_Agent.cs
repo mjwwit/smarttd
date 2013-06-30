@@ -26,11 +26,15 @@ public abstract class Plan//<T> where T : Unit // not sure which type (or interf
 	// return true if the plan has an executable action defined
 	public bool HasAction;
 	
+	// When both the precondition and the invocation condition are satisfied, we have a reason to commit to the plan.
+	
 	// return true if the current situation satisfies the pre-condition of this plan
 	public abstract bool SatisfiesPreCondition();
-	
 	// return true if the current situation satisfies the invocation condition ("trigger event")
 	public abstract bool SatisfiesInvocationCondition();
+	
+	// If this condition is satisfied, we stop committing to this plan.
+	public abstract bool TerminationCondition();
 	
 	// execute the action that belongs to this plan
 	public abstract void ExecuteAction();
@@ -83,6 +87,8 @@ public class BDI_Agent
 	// - Friendly unit takes damage
 	// - ???
 	// Constantly changing: friendly unit position. Not sure how to model/quantify this.
+	// We might not have to explicitly model these events, but simply check all the conditions all the time. 
+	// It's probably fast enough in our system.
 	
 	/*
 	Algorithm:
@@ -105,12 +111,21 @@ public class BDI_Agent
 	
 	public void Update()
 	{
+		ConsideredPlans.Clear();
 		// option generator
 		// read event queue ( or current status ) and return a list of options
-		// options generated will be a series of possible positions to move to, based on information about the world
-		// ie up, down, left, right
 		
 		// select a subset of options to be adopted
+		foreach(Plan p in PossiblePlans)
+		{
+			if(p.SatisfiesPreCondition() && p.SatisfiesInvocationCondition())
+			{
+				ConsideredPlans.Add(p);
+			}
+		}
+		
+		// we need some kind of way to enforce consistency in our actions:
+		// "... desires and intentions have to be closed under implication and have to be consistent. "
 		
 		// add options to intention structure
 		
