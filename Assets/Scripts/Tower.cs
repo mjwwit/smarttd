@@ -20,6 +20,13 @@ public class Tower : BasicObject
 	}
 	protected override void Update ()
 	{
+		base.Update ();
+		
+		drawRange ();
+	}
+	
+	protected override void FixedUpdate ()
+	{
 		// basic target and fire mechanism
 		if(CurrentTarget == null 
 			|| DistanceTo(CurrentTarget) > RangeOfView
@@ -30,7 +37,7 @@ public class Tower : BasicObject
 		}
 		else
 		{
-			nextAttackCooldown -= Time.deltaTime;
+			nextAttackCooldown -= Time.fixedDeltaTime;
 			
 			// cooldown & fire
 			if(nextAttackCooldown <= 0)
@@ -51,9 +58,6 @@ public class Tower : BasicObject
 			
 			Visualizer.DrawLine(gun.position, CurrentTarget.transform.position, lineColor);
 		}
-		base.Update ();
-		
-		drawRange ();
 	}
 	
 	protected virtual void Fire()

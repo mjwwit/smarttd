@@ -53,8 +53,11 @@ public class Unit : BasicObject
 	protected override void Update ()
 	{
 		base.Update ();
-		
-		// current position
+
+	}
+	
+	protected void FixedUpdate ()
+	{
 		Vector3 cPos = transform.position;
 		
 		// store units that are in range
