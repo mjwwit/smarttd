@@ -25,7 +25,7 @@ public class Tower : BasicObject
 		drawRange ();
 	}
 	
-	protected override void FixedUpdate ()
+	protected void FixedUpdate ()
 	{
 		// basic target and fire mechanism
 		if(CurrentTarget == null 
