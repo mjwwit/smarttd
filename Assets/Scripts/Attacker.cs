@@ -56,13 +56,17 @@ public static class Attacker
 	public static void AddObject(BasicObject obj)
 	{
 		Objects.Add(obj);
-		if(obj.GetType() == typeof(Unit)) Units.Add( (Unit)obj );
+		
+		Unit u = obj as Unit;
+		if(u) Units.Add( u );
 	}
 	
 	public static void RemoveObject(BasicObject obj)
 	{
 		Objects.Remove(obj);
-		if(obj.GetType() == typeof(Unit)) Units.Remove( (Unit)obj );
+		
+		Unit u = obj as Unit;
+		if(u) Units.Remove( u );
 	}
 	
 	// Check to see how close we are to the goal.

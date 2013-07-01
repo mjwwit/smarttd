@@ -22,10 +22,25 @@ public class Tower : BasicObject
 	{
 		base.Update ();
 		
+			
+		// targeting visualization
+		float cdRatio = nextAttackCooldown / AttackCooldown;
+		
+		Color lineColor = new Color(
+			cdRatio > .5f ? 2-cdRatio*2 : 1, 
+			cdRatio > .5f ? 1 : cdRatio*2, 
+			0
+		);
+		
+		if(! (CurrentTarget == null 
+			|| DistanceTo(CurrentTarget) > RangeOfView
+			|| !CurrentTarget.IsAlive) )
+			Visualizer.DrawLine(gun.position, CurrentTarget.transform.position, lineColor);
+		
 		drawRange ();
 	}
 	
-	protected void FixedUpdate ()
+	protected override void FixedUpdate ()
 	{
 		// basic target and fire mechanism
 		if(CurrentTarget == null 
@@ -46,17 +61,6 @@ public class Tower : BasicObject
 				
 				Fire();
 			}
-			
-			// targeting visualization
-			float cdRatio = nextAttackCooldown / AttackCooldown;
-			
-			Color lineColor = new Color(
-				cdRatio > .5f ? 2-cdRatio*2 : 1, 
-				cdRatio > .5f ? 1 : cdRatio*2, 
-				0
-			);
-			
-			Visualizer.DrawLine(gun.position, CurrentTarget.transform.position, lineColor);
 		}
 	}
 	
@@ -64,7 +68,7 @@ public class Tower : BasicObject
 	{
 		// we might want to fire a projectile here or something in the future
 		// and move this code to the projectile on impact
-		CurrentTarget.TakeDamage(Damage);	
+		CurrentTarget.TakeDamage(Damage);
 	}
 	
 	protected virtual void AcquireTarget()

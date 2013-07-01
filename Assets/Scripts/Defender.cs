@@ -15,12 +15,16 @@ public static class Defender
 	public static void AddObject(BasicObject obj)
 	{
 		Objects.Add(obj);
-		if(obj.GetType() == typeof(Tower)) Towers.Add( (Tower)obj );
+		
+		Tower t = obj as Tower;
+		if(t) Towers.Add( t );
 	}
 	
 	public static void RemoveObject(BasicObject obj)
 	{
 		Objects.Remove(obj);
-		if(obj.GetType() == typeof(Tower)) Towers.Remove( (Tower)obj );
+		
+		Tower t = obj as Tower;
+		if(t) Towers.Remove( t );
 	}
 }

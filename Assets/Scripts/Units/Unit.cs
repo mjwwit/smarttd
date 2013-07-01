@@ -10,9 +10,10 @@ public class Unit : BasicObject
 	
 	List<BasicObject> knownDefenders;
 	
+	// todo: move hexmap to beliefs
 	// grid-based pathfinding variables
-	HexMap map;
-	List<Node> path;
+	public HexMap map;
+	public List<Node> path;
 	int cPathNode;
 	
 	public float PositionReachedMargin = .5f;
@@ -152,6 +153,7 @@ public class Unit : BasicObject
 	
 	#endregion
 	
+	// todo: move this to belief updating
 	#region New Data Handling
 	
 	void handleNewData()
@@ -197,6 +199,7 @@ public class Unit : BasicObject
 	
 	#endregion
 	
+	// todo: move this part to beliefs
 	#region Grid-based path planning
 	
 	Vector3 getGoalVector(Vector3 cPos)
@@ -228,6 +231,10 @@ public class Unit : BasicObject
 		return goalForce;
 	}
 	
+	public Vector3 GetGridGoal()
+	{
+		return GetGridGoal(this.transform.position);
+	}
 	Vector3 GetGridGoal(Vector3 currentPosition)
 	{
 		// if we don´t have a path

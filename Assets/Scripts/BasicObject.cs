@@ -64,7 +64,7 @@ public class BasicObject : MonoBehaviour
 	// Update is called once per frame
 	protected virtual void Update ()
 	{
-		if(!IsAlive) Destroy(this.gameObject);	
+		if(!IsAlive) Destroy(this.gameObject);
 	}
 	protected virtual void FixedUpdate ()
 	{
@@ -180,6 +180,22 @@ public class BasicObject : MonoBehaviour
 			// add to list if within range
 			if( IsInRange(position, range, obj) >= 0 )
 				objectsInRange.Add(obj);
+		}
+		return objectsInRange;
+	}
+	
+	public static List<T> FindAllInRange<T, U>( Vector3 position, float range, List<U> objects ) where T : BasicObject
+	{
+		List<T> objectsInRange = new List<T>();
+		foreach( U obj in objects )
+		{
+			T o = obj as T;
+			
+			if( o == null ) continue;
+			
+			// add to list if within range
+			if( IsInRange(position, range, o) >= 0 )
+				objectsInRange.Add(o);
 		}
 		return objectsInRange;
 	}

@@ -5,42 +5,7 @@ using System.Collections.Generic;
 // BDI implementation based on wikipedia:
 // https://en.wikipedia.org/wiki/Belief%E2%80%93desire%E2%80%93intention_software_model#BDI_agent_implementations
 
-/*
-We represent the information about the means of achieving certain future world states 
-and the options available to the agent as plans, which can be viewed as a special form 
-of beliefs (Rao and Georgeff 1992). 
-Intuitively, plans are abstract specifications of both the means for achieving certain 
-desires and the options available to the agent. 
-Each plan has a body describing the primitive actions or subgoals that have to be 
-achieved for plan execution to be successful.
-The conditions under which a plan can be chosen as an option are specified by an 
-invocation condition and a pre-condition; the invocation condition specifies the 
-"triggering" event that is necessary for invocation of the plan, and the precondition 
-specifies the situation that must hold for the plan to be executable.
-*/
-public abstract class Plan//<T> where T : Unit // not sure which type (or interface?) we should set here, want to keep it as generic as possible
-{
-	// the subplans required for completing this plan's goals
-	public List<Plan> SubPlans;
-	
-	// return true if the plan has an executable action defined
-	public bool HasAction;
-	
-	// When both the precondition and the invocation condition are satisfied, we have a reason to commit to the plan.
-	
-	// return true if the current situation satisfies the pre-condition of this plan
-	public abstract bool SatisfiesPreCondition();
-	// return true if the current situation satisfies the invocation condition ("trigger event")
-	public abstract bool SatisfiesInvocationCondition();
-	
-	// If this condition is satisfied, we stop committing to this plan.
-	public abstract bool TerminationCondition();
-	
-	// execute the action that belongs to this plan
-	public abstract void ExecuteAction();
-}
-
-public class BDI_Agent
+public abstract class BDI_Agent
 {
 	// Beliefs / belief base:
 	/*
@@ -54,9 +19,7 @@ public class BDI_Agent
 		o End goal position (
 		o Terrain (implicit with grid)
 	*/
-	Unit me;
-	List<Unit> friends;
-	List<Tower> enemies;
+	//Beliefs beliefs;
 	
 	// Desires / goals:
 	/*
@@ -109,19 +72,53 @@ public class BDI_Agent
 
 	*/
 	
-	public void Update()
+	public BDI_Agent()
 	{
-		ConsideredPlans.Clear();
+		PossiblePlans = new List<Plan>(availablePlans());
+		ConsideredPlans = new List<Plan>();
+		CommittedPlans = new List<Plan>();
+	}
+	
+	protected abstract Plan[] availablePlans();
+	
+	public virtual void Update()
+	{
 		// option generator
 		// read event queue ( or current status ) and return a list of options
+		
+		ConsideredPlans.Clear();
 		
 		// select a subset of options to be adopted
 		foreach(Plan p in PossiblePlans)
 		{
-			if(p.SatisfiesPreCondition() && p.SatisfiesInvocationCondition())
+			if(p.SatisfiesPreCondition()
+				&& !CommittedPlans.Contains(p))
 			{
 				ConsideredPlans.Add(p);
 			}
+		}
+		
+		foreach(Plan p in ConsideredPlans)
+		{
+			if(p.SatisfiesInvocationCondition())
+			{
+				// enforce consistency
+				// -> do some decision making on which plan(s) to commit to
+				
+				CommittedPlans.Add(p);
+			}
+		}
+		
+		for(int i = CommittedPlans.Count-1; i >= 0; --i)
+		{
+			Plan p = CommittedPlans[i];
+			
+			// success is a bad variable name
+			// the return value indicates if we should continue executing this plan
+			bool success = p.ExecutePlan();
+			
+			if(!success)
+				CommittedPlans.RemoveAt(i);
 		}
 		
 		// we need some kind of way to enforce consistency in our actions:
