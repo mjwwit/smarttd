@@ -64,7 +64,10 @@ public class BasicObject : MonoBehaviour
 	// Update is called once per frame
 	protected virtual void Update ()
 	{
-		if(!IsAlive) Destroy(this.gameObject);
+		if(!IsAlive) Destroy(this.gameObject);	
+	}
+	protected virtual void FixedUpdate ()
+	{
 	}
 	
 	public virtual void TakeDamage(int damage)

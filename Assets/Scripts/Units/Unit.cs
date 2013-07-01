@@ -56,8 +56,10 @@ public class Unit : BasicObject
 
 	}
 	
-	protected void FixedUpdate ()
+	protected override void FixedUpdate ()
 	{
+		base.FixedUpdate();
+		
 		Vector3 cPos = transform.position;
 		
 		// store units that are in range
@@ -82,16 +84,16 @@ public class Unit : BasicObject
 		totalForce += getFlockingVector(cPos) * FlockingStrength;
 		
 		// velocity
-		velocity += totalForce / Mass * Time.deltaTime;
+		velocity += totalForce / Mass * Time.fixedDeltaTime;
 		
 		// clamp to maximum speed
 		//velocity /= velocity.magnitude * MovementSpeed;
 		velocity = Vector3.ClampMagnitude(velocity, MovementSpeed);
 		
 		// move unit
-		transform.position += velocity * Time.deltaTime;
+		transform.position += velocity * Time.fixedDeltaTime;
 		
-		//transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.deltaTime);
+		//transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.fixedDeltaTime);
 	}
 	
 	#region Flocking
