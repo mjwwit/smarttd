@@ -24,10 +24,8 @@ public class BasicObject : MonoBehaviour
 	
 	public int MaxHP = 1;
 	
-	[HideInInspector]
 	public int HP;
 	
-	[HideInInspector]
 	public bool IsAlive = true;
 	
 	// world units per second
@@ -50,10 +48,11 @@ public class BasicObject : MonoBehaviour
 	
 	#endregion
 	
-	
 	// Use this for initialization
 	protected virtual void Start ()
 	{
+		Buffs = new List<Buff>();
+		
 		//transform = this.GetComponent<Transform>();
 		renderer = transform.FindChild("Model").GetComponent<Renderer>();
 		material = renderer.material;
@@ -68,19 +67,66 @@ public class BasicObject : MonoBehaviour
 	}
 	protected virtual void FixedUpdate ()
 	{
+		updateBuffs(Time.fixedDeltaTime);
 	}
+	
+	#region Status Management
+	
+	#region Buff Management
+	
+	public List<Buff> Buffs;
+	public void ApplyBuff(Buff b)
+	{
+		b.SetActive(this);
+		Buffs.Add(b);
+	}
+	public void RemoveBuff(Buff b)
+	{
+		b.SetInactive();
+		Buffs.Remove(b);
+	}
+	protected void updateBuffs(float deltaTime)
+	{
+		List<Buff> buffsToUpdate = new List<Buff>(Buffs);
+		foreach( Buff b in buffsToUpdate )
+		{
+			if(b.IsActive)
+				b.Update(deltaTime);
+		}
+	}
+	
+	#endregion
+	
+	#region Immunity
+	
+	// variable used by immunity buff to prevent immunity overrides
+	public uint numImmunityBuffs = 0;
+	
+	bool immune = false;
+	public void SetImmunity(bool setImmune)
+	{
+		this.immune = setImmune;
+	}
+	#endregion
 	
 	public virtual void TakeDamage(int damage)
 	{
-		Blink(Color.red);
-		HP -= damage;
-		if(HP <= 0)
-			Die();
+		if(immune)
+			Blink(Color.white);
+		else
+		{
+			Blink(Color.red);
+			HP -= damage;
+			if(HP <= 0)
+				Die();
+		}
 	}
 	public virtual void Die()
 	{
 		IsAlive = false;
 	}
+	
+	#endregion
 	
 	#region Helper Functions
 	

@@ -23,6 +23,9 @@ public class BDI_Unit : Unit
 	
 	protected override void FixedUpdate ()
 	{
+		// todo: replace this with base.FixedUpdate() when merging with Unit.cs
+		updateBuffs(Time.fixedDeltaTime);
+		
 		Vector3 cPos = transform.position;
 		
 		// update agent
