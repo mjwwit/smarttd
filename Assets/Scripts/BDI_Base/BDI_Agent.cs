@@ -19,7 +19,7 @@ public abstract class BDI_Agent
 		o End goal position (
 		o Terrain (implicit with grid)
 	*/
-	//Beliefs beliefs;
+	public BDI_Beliefs beliefs;
 	
 	// Desires / goals:
 	/*
@@ -30,6 +30,11 @@ public abstract class BDI_Agent
 			* Become more reckless as time progresses
 		o Help others stay alive (others can help you stay alive)
 	- Help others stay alive (more units at the end is good!)
+	
+	Expressed in beliefs:
+	- I'm at the goal.
+	- My friends are at the goal.
+	
 	 */
 	
 	// Intentions
@@ -38,9 +43,9 @@ public abstract class BDI_Agent
 	// - ?? special actions ??
 	// Intentions are represented by an hierarchical structure of plans. 
 	// The SubPlans list in the Plan class represents this structure!
-	List<Plan> PossiblePlans;
-	List<Plan> ConsideredPlans;
-	List<Plan> CommittedPlans;
+	List<BDI_Plan> PossiblePlans;
+	List<BDI_Plan> ConsideredPlans;
+	List<BDI_Plan> CommittedPlans;
 	
 	// Events
 	// New information
@@ -74,22 +79,32 @@ public abstract class BDI_Agent
 	
 	public BDI_Agent()
 	{
-		PossiblePlans = new List<Plan>(availablePlans());
-		ConsideredPlans = new List<Plan>();
-		CommittedPlans = new List<Plan>();
+		PossiblePlans = new List<BDI_Plan>(GetAvailablePlans());
+		ConsideredPlans = new List<BDI_Plan>();
+		CommittedPlans = new List<BDI_Plan>();
 	}
 	
-	protected abstract Plan[] availablePlans();
+	//public virtual void Start()
+	//{
+	//	Beliefs = GetBeliefs();
+	//}
+	
+	public abstract void SetBeliefs();
+	protected abstract BDI_Plan[] GetAvailablePlans();
 	
 	public virtual void Update()
 	{
 		// option generator
 		// read event queue ( or current status ) and return a list of options
+		// ----->
+		//   we update the beliefs and fire events
+		//   pre- and triggerconditions of plans might be satisfied after that
+		beliefs.Update();
 		
 		ConsideredPlans.Clear();
 		
 		// select a subset of options to be adopted
-		foreach(Plan p in PossiblePlans)
+		foreach(BDI_Plan p in PossiblePlans)
 		{
 			if(p.SatisfiesPreCondition()
 				&& !CommittedPlans.Contains(p))
@@ -98,7 +113,7 @@ public abstract class BDI_Agent
 			}
 		}
 		
-		foreach(Plan p in ConsideredPlans)
+		foreach(BDI_Plan p in ConsideredPlans)
 		{
 			if(p.SatisfiesInvocationCondition())
 			{
@@ -109,9 +124,11 @@ public abstract class BDI_Agent
 			}
 		}
 		
+		// the plans we're committing to represent the current goal state of the agent
+		
 		for(int i = CommittedPlans.Count-1; i >= 0; --i)
 		{
-			Plan p = CommittedPlans[i];
+			BDI_Plan p = CommittedPlans[i];
 			
 			// success is a bad variable name
 			// the return value indicates if we should continue executing this plan

@@ -13,11 +13,11 @@ invocation condition and a pre-condition; the invocation condition specifies the
 "triggering" event that is necessary for invocation of the plan, and the precondition 
 specifies the situation that must hold for the plan to be executable.
 */
-public abstract class Plan
+public abstract class BDI_Plan
 {
 	static int idCounter = 0;
 	public readonly int ID;
-	public Plan()
+	public BDI_Plan()
 	{
 		ID = idCounter++;
 	}
@@ -36,7 +36,7 @@ public abstract class Plan
 	//BDI_Agent agent;
 	
 	// the subplans required for completing this plan's goals
-	public List<Plan> SubPlans;
+	public List<BDI_Plan> SubPlans;
 	
 	// When both the precondition and the invocation condition are satisfied, we have a reason to commit to the plan.
 	
@@ -57,14 +57,14 @@ public abstract class Plan
 	
 	#region Plan Execution
 	
-	public Stack<Plan> GetExecutionStack()
+	public Stack<BDI_Plan> GetExecutionStack()
 	{
-		Stack<Plan> stack = new Stack<Plan>();
+		Stack<BDI_Plan> stack = new Stack<BDI_Plan>();
 		addToStack(stack, this);
 		
 		return stack;
 	}
-	void addToStack(Stack<Plan> s, Plan p)
+	void addToStack(Stack<BDI_Plan> s, BDI_Plan p)
 	{
 		s.Push(p);
 		
@@ -76,8 +76,8 @@ public abstract class Plan
 		}
 	}
 	
-	protected Stack<Plan> stack;
-	Plan p;
+	protected Stack<BDI_Plan> stack;
+	BDI_Plan p;
 	bool planStarted = false;
 	
 	public bool ExecutePlan()	

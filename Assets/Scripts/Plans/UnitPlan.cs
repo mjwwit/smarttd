@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public abstract class UnitPlan : Plan
+public abstract class UnitPlan : BDI_Plan
 {
 	protected UnitAgent agent;
 	

@@ -2,7 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-public class UnitBeliefs : Beliefs
+public class UnitBeliefs : BDI_Beliefs
 {
 	public BDI_Unit Me;
 	//public List<BDI_Unit> Friends;
@@ -17,7 +17,7 @@ public class UnitBeliefs : Beliefs
 		Enemies = new List<Tower>();
 	}
 	
-	public void Update()
+	public override void Update()
 	{
 		// all of type BDI_Unit in range
 		FriendsInRange = BasicObject.FindAllInRange<BDI_Unit, BasicObject>( 

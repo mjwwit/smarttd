@@ -14,13 +14,13 @@ public class Plan_FollowOptimalPath : UnitPlan
 	}
 	public override bool SatisfiesInvocationCondition ()
 	{
-		if(agent.Beliefs.FriendsInRange.Count <= 0)
+		if(agent.unitBeliefs.FriendsInRange.Count <= 0)
 			return true;
 		return false;
 	}
 	public override bool SatisfiesTerminationCondition ()
 	{
-		return agent.Beliefs.FriendsInRange.Count > 0;
+		return agent.unitBeliefs.FriendsInRange.Count > 0;
 		//return false;
 	}
 	public override bool SatisfiesSuccessCondition ()
@@ -31,7 +31,7 @@ public class Plan_FollowOptimalPath : UnitPlan
 	
 	public override void ExecuteStep ()
 	{
-		Vector3 nextPos = agent.Beliefs.Me.GetGridGoal();
+		Vector3 nextPos = agent.unitBeliefs.Me.GetGridGoal();
 		agent.SetGoal(nextPos);
 		
 		//stack.Push(this);

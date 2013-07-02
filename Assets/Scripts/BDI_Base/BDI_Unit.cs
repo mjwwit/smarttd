@@ -4,15 +4,21 @@ using System.Collections.Generic;
 
 public class BDI_Unit : Unit
 {
-	UnitAgent agent;
+	public UnitAgent Agent;
 	
 	public Vector3 GoalPosition;
 	
 	protected override void Start ()
 	{
 		base.Start ();
-		agent = new UnitAgent(this);
 		GoalPosition = this.transform.position;
+		SetAgent();
+		Agent.SetBeliefs();
+	}
+	
+	protected virtual void SetAgent()
+	{
+		Agent = new UnitAgent(this);
 	}
 	
 	protected override void FixedUpdate ()
@@ -20,7 +26,7 @@ public class BDI_Unit : Unit
 		Vector3 cPos = transform.position;
 		
 		// update agent
-		agent.Update();
+		Agent.Update();
 		
 		// velocity
 		velocity = MovementSpeed * (GoalPosition - cPos).normalized;
