@@ -7,13 +7,9 @@ public class ShieldUnit : BDI_Unit
 	public float ShieldRange = 2.0f;
 	public int ShieldHP = 10;
 	
-	private List<Unit> ShieldedUnits = new List<Unit>();
-	
-	public ShieldBuff UnitBuff = new ShieldBuff(0f);
-	
 	public ShieldUnit()
 	{
-		UnitBuff.SetShieldUnit(this);
+		
 	}
 	
 	protected override void SetAgent ()
@@ -28,14 +24,6 @@ public class ShieldUnit : BDI_Unit
 		{
 			Blink(Color.blue);
 			ShieldHP -= damage;
-			if(ShieldHP <= 0)
-			{
-				// Shield has been destroyed
-				foreach(Unit u in ShieldedUnits)
-				{
-					u.RemoveBuff(UnitBuff);
-				}
-			}
 		}
 		else
 		{
@@ -46,28 +34,5 @@ public class ShieldUnit : BDI_Unit
 	protected override void FixedUpdate()
 	{
 		base.FixedUpdate();
-		
-		foreach(Unit u in Attacker.Units)
-		{
-			float distance = Vector3.Distance(this.transform.position, u.transform.position);
-			if(distance <= ShieldRange)
-			{
-				// Unit is inside the shield
-				if(!ShieldedUnits.Contains(u))
-				{
-					Debug.Log(u + " is now protected by the shield!");
-					ShieldedUnits.Add(u);
-					u.ApplyBuff(UnitBuff);
-				}
-					
-			}
-			else if(ShieldedUnits.Contains(u))
-			{
-				Debug.Log(u + " left the protection of the shield!");
-				ShieldedUnits.Remove(u);
-				u.RemoveBuff(UnitBuff);
-			}
-				
-		}
 	}
 }

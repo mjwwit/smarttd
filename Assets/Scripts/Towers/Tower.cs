@@ -68,17 +68,17 @@ public class Tower : BasicObject
 	{
 		// we might want to fire a projectile here or something in the future
 		// and move this code to the projectile on impact
-		foreach(Buff b in CurrentTarget.Buffs)
+		
+		foreach(ShieldUnit su in Attacker.ShieldUnits)
 		{
-			if(b.GetType().ToString() == "ShieldBuff")
+			if(IsInRange(su.transform.position, su.ShieldRange, CurrentTarget) >= 0)
 			{
-				ShieldBuff sb = (ShieldBuff)b;
-				sb.GetShieldUnit().TakeDamage(Damage);
-				break;
+				su.TakeDamage(Damage);
+				return;
 			}
 		}
 			
-			CurrentTarget.TakeDamage(Damage);
+		CurrentTarget.TakeDamage(Damage);
 	}
 	
 	protected virtual void AcquireTarget()

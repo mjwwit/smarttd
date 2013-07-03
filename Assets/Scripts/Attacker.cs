@@ -46,11 +46,13 @@ public static class Attacker
 	
 	public static List<BasicObject> Objects;
 	public static List<Unit> Units;
+	public static List<ShieldUnit> ShieldUnits;
 	
 	public static void Awake ()
 	{
 		Objects = new List<BasicObject>( (Unit[])GameObject.FindObjectsOfType(typeof(Unit)) );
 		Units = new List<Unit>( (Unit[])GameObject.FindObjectsOfType(typeof(Unit)) );
+		ShieldUnits = new List<ShieldUnit>( (ShieldUnit[])GameObject.FindObjectsOfType(typeof(ShieldUnit)) );
 	}
 	
 	public static void AddObject(BasicObject obj)
@@ -59,6 +61,9 @@ public static class Attacker
 		
 		Unit u = obj as Unit;
 		if(u) Units.Add( u );
+		
+		ShieldUnit su = obj as ShieldUnit;
+		if(su) ShieldUnits.Add( su );
 	}
 	
 	public static void RemoveObject(BasicObject obj)
@@ -67,6 +72,9 @@ public static class Attacker
 		
 		Unit u = obj as Unit;
 		if(u) Units.Remove( u );
+		
+		ShieldUnit su = obj as ShieldUnit;
+		if(su) ShieldUnits.Remove( su );
 	}
 	
 	// Check to see how close we are to the goal.

@@ -11,6 +11,15 @@ public class Tower_AoE : Tower
 		// we might want to fire a projectile here or something in the future
 		// and move this code to the projectile on impact
 		
+		foreach(ShieldUnit su in Attacker.ShieldUnits)
+		{
+			if(IsInRange(su.transform.position, su.ShieldRange, CurrentTarget) >= 0)
+			{
+				su.TakeDamage(Damage);
+				return;
+			}
+		}
+		
 		// find all attackers in range of our AoE at the current target's position
 		List<BasicObject> targets = FindAllInRange<BasicObject>(
 				CurrentTarget.transform.position, AreaOfEffectRadius, Attacker.Objects);
