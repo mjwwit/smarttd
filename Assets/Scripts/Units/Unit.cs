@@ -79,7 +79,7 @@ public class Unit : BasicObject
 		totalForce = Vector3.zero;
 		
 		// goal vector component
-	 	totalForce += getGoalVector(cPos) * GoalForceStrength;
+	 	//totalForce += getGoalVector(cPos) * GoalForceStrength;
 		
 		// apply flocking force
 		//totalForce += getFlockingVector(attackers, defenders, cPos) * FlockingStrength;
@@ -203,14 +203,14 @@ public class Unit : BasicObject
 	// todo: move this part to beliefs
 	#region Grid-based path planning
 	
-	public Vector3 getGoalVector(Vector3 cPos)
+	public Vector3 getGoalVector(Vector3 fromPos, Vector3 toPos)
 	{
 		// get goal position
 		// can be used as a hint for a forces based method
-		Vector3 gridGoal = GetGridGoal(cPos);
+		Vector3 gridGoal = GetGridGoal(fromPos);
 		
 		// get difference vector and distance
-		Vector3 diff = gridGoal - cPos;
+		Vector3 diff = gridGoal - fromPos;
 		float distance = diff.magnitude;
 		
 		// if we already reached this position
@@ -218,7 +218,7 @@ public class Unit : BasicObject
 		{
 			// move towards ultimate goal
 			// set new difference vector and distance
-			diff = Attacker.VectorToGoal(cPos);
+			diff = Attacker.VectorToGoal(fromPos);
 			distance = diff.magnitude;
 		}
 		

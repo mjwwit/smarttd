@@ -6,12 +6,9 @@ public class BDI_Unit : Unit
 {
 	public UnitAgent Agent;
 	
-	public Vector3 GoalPosition;
-	
 	protected override void Start ()
 	{
 		base.Start ();
-		GoalPosition = this.transform.position;
 		SetAgent();
 		Agent.SetBeliefs();
 	}
