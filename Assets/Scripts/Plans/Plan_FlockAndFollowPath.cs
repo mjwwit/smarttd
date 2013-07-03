@@ -7,7 +7,7 @@ public class Plan_FlockAndFollowPath : UnitPlan
 {	
 	public Plan_FlockAndFollowPath(UnitAgent agent) : base(agent)
 	{
-		
+		Type |= PlanType.Movement;
 	}
 	
 	public override bool SatisfiesPreCondition ()
@@ -22,13 +22,18 @@ public class Plan_FlockAndFollowPath : UnitPlan
 	{
 		return agent.unitBeliefs.FriendsInRange.Count <= 0;
 	}
-	
 	public override bool SatisfiesSuccessCondition ()
 	{
 		return Attacker.DistanceToGoal(agent.GetPosition()) < 0.2f;
 	}
 	
-	public override void StartPlan ()
+	// heuristic: how many units will survive when we use this plan, including ourselves?
+	public override float ContributionHeuristic ()
+	{
+		return agent.unitBeliefs.FriendsInRange.Count + 1;
+	}
+	
+	protected override void StartPlan ()
 	{
 		// reset any existing optimal path
 		agent.me.path = null;
@@ -39,10 +44,9 @@ public class Plan_FlockAndFollowPath : UnitPlan
 		Vector3 totalForce = Vector3.zero;
 		
 		BDI_Unit me = this.agent.unitBeliefs.Me;
-		Vector3 cPos = me.transform.position;
 		
 		// goal vector component
-	 	totalForce += me.getGoalVector(cPos) * me.GoalForceStrength;
+	 	totalForce += me.getGoalVector(me.transform.position, me.GetGridGoal()) * me.GoalForceStrength;
 		
 		// apply flocking force
 		totalForce += Unit.getFlockingVector(
@@ -51,12 +55,11 @@ public class Plan_FlockAndFollowPath : UnitPlan
 				agent.unitBeliefs.EnemiesInRange) 
 			* me.FlockingStrength;
 		
-		Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
 		// velocity
+		Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
 		velocity += totalForce / me.Mass * Time.fixedDeltaTime;
 		
 		// clamp to maximum speed
-		//velocity /= velocity.magnitude * MovementSpeed;
 		velocity = Vector3.ClampMagnitude(velocity, me.MovementSpeed);
 		
 		agent.unitBeliefs.OptimalVelocity = velocity;

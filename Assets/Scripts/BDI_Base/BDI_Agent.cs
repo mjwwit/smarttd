@@ -92,6 +92,9 @@ public abstract class BDI_Agent
 	public abstract void SetBeliefs();
 	protected abstract BDI_Plan[] GetAvailablePlans();
 	
+	protected abstract bool GoalsCompleted();
+	
+	// currently every frame, but using a coroutine this can easily be changed to some time interval
 	public virtual void Update()
 	{
 		// option generator
@@ -101,17 +104,32 @@ public abstract class BDI_Agent
 		//   pre- and triggerconditions of plans might be satisfied after that
 		beliefs.Update();
 		
+		// if our goals are completed, stop the agent
+		if(GoalsCompleted())
+		{
+			StopAgent();
+			
+			return;
+		}
+		
+		
 		ConsideredPlans.Clear();
 		
 		// select a subset of options to be adopted
 		foreach(BDI_Plan p in PossiblePlans)
 		{
 			if(p.SatisfiesPreCondition()
-				&& !CommittedPlans.Contains(p))
+				&& !CommittedPlans.Contains(p)
+				&& !p.SatisfiesSuccessCondition())
 			{
 				ConsideredPlans.Add(p);
 			}
 		}
+		
+		// our considered plans are now all plans that satisfy the precondition
+		// additionally, they exclude:
+		// - plans we're currently committing to 
+		// - plans that have already succeeded before we even start them
 		
 		foreach(BDI_Plan p in ConsideredPlans)
 		{
@@ -120,7 +138,43 @@ public abstract class BDI_Agent
 				// enforce consistency
 				// -> do some decision making on which plan(s) to commit to
 				
-				CommittedPlans.Add(p);
+				bool addPlan = true;
+				List<BDI_Plan> currentlyCommittedPlans = new List<BDI_Plan>(CommittedPlans);
+				foreach(BDI_Plan cPlan in currentlyCommittedPlans)
+				{
+					// check for overlap (but not which types overlap!)
+					// todo: take multiple plan types into account! difficulty: high
+					// 		    multiple overlapping plans with different possible combinations are possible
+					if(BDI_Plan.PlanTypeOverlaps(p, cPlan))
+					{
+						// select the best plan
+						BDI_Plan bestPlan = SolvePlanConflict(p, cPlan);
+						
+						// if the best plan is the same as our considered plan
+						if(bestPlan == p)
+						{
+							// stop current plan
+							cPlan.Stop();
+							// remove from committed plans
+							CommittedPlans.Remove(cPlan);
+						}
+						// if the best plan is a current plan
+						else
+						{
+							// don't add the plan
+							addPlan = false;
+							// quit
+							break;
+						}
+					}
+				}
+				
+				// if we've decided to commit to this plan, add it
+				if(addPlan)
+				{
+					CommittedPlans.Add(p);
+					Debug.Log("Agent " + beliefs.MyName() + " committed to a new plan: " + p.GetType());
+				}
 			}
 		}
 		
@@ -149,5 +203,24 @@ public abstract class BDI_Agent
 		
 		// drop successful desires and satisfied intentions
 		// drop impossible desires and unrealizable intentions
+	}
+	
+	// returns the best of the two plans, based on their heuristic functions
+	BDI_Plan SolvePlanConflict(BDI_Plan a, BDI_Plan b)
+	{
+		float aValue = a.ContributionHeuristic();
+		float bValue = b.ContributionHeuristic();
+		
+		if(aValue > bValue) return a;
+		else return b;
+	}
+	
+	public virtual void StopAgent()
+	{
+		foreach(BDI_Plan p in CommittedPlans)
+		{
+			p.Stop();
+		}
+		CommittedPlans.Clear();
 	}
 }

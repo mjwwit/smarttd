@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /*
 We represent the information about the means of achieving certain future world states 
@@ -13,6 +15,20 @@ invocation condition and a pre-condition; the invocation condition specifies the
 "triggering" event that is necessary for invocation of the plan, and the precondition 
 specifies the situation that must hold for the plan to be executable.
 */
+
+public enum PlanType
+{
+	Movement = 1,
+	//Type2 = 2,
+	//Type3 = 4,
+	//Type4 = 8,
+	//Type5 = 16,
+	//Type6 = 32,
+	//Type7 = 64,
+	//Type8 = 128,
+	// etc.
+}
+
 public abstract class BDI_Plan
 {
 	static int idCounter = 0;
@@ -20,7 +36,48 @@ public abstract class BDI_Plan
 	public BDI_Plan()
 	{
 		ID = idCounter++;
+		Type = 0;
 	}
+	
+	#region Plan Type
+	
+	public static bool PlanTypeOverlaps(BDI_Plan a, BDI_Plan b)
+	{
+		return PlanTypeOverlaps(a.Type, b.Type);
+	}
+	public static bool PlanTypeOverlaps(PlanType a, PlanType b)
+	{
+		return (a&b)>0;
+	}
+	public static bool IsPlanType(PlanType source, PlanType compareTo)
+	{
+		return source == compareTo;
+	}
+	public static bool HasPlanType(PlanType source, PlanType compareTo)
+	{
+		return (source & compareTo) == compareTo;
+	}
+	public static List<PlanType> GetOverlappingPlanTypes(BDI_Plan a, BDI_Plan b)
+	{
+		return GetOverlappingPlanTypes(a.Type, b.Type);
+	}
+	public static List<PlanType> GetOverlappingPlanTypes(PlanType a, PlanType b)
+	{
+		List<PlanType> types = new List<PlanType>();
+		PlanType overlap = a&b;
+		
+		foreach (PlanType pt in Enum.GetValues(typeof(PlanType)))
+		{
+			if((overlap & pt) == pt)
+				types.Add(pt);
+		}
+		
+		return types;
+	}
+	
+	public PlanType Type;
+	
+	#endregion
 	
 	/*Plan parent;
 	
@@ -38,6 +95,8 @@ public abstract class BDI_Plan
 	// the subplans required for completing this plan's goals
 	public List<BDI_Plan> SubPlans;
 	
+	#region Conditions
+	
 	// When both the precondition and the invocation condition are satisfied, we have a reason to commit to the plan.
 	
 	// return true if the current situation satisfies the pre-condition of this plan
@@ -52,11 +111,19 @@ public abstract class BDI_Plan
 	// If this condition is satisfied, we go to the next (sub)step in the plan.
 	public abstract bool SatisfiesSuccessCondition();
 	
-	public virtual void StartPlan() { }
-	public virtual void EndPlan() { }
+	#endregion
+	
+	// This function should define a heuristic that estimates how much influence this plan has on the end result.
+	public abstract float ContributionHeuristic();
+	
+	// execute once when the plan is started
+	protected virtual void StartPlan() { }
 	
 	// execute the action that belongs to this plan
 	public abstract void ExecuteStep();
+	
+	// execute once when the plan is ended
+	protected virtual void EndPlan() { }
 	
 	#region Plan Execution
 	
@@ -85,20 +152,35 @@ public abstract class BDI_Plan
 	
 	public bool ExecutePlan()	
 	{
-		if(!planStarted) startPlan();
+		if(!planStarted)
+		{
+			startPlan();
+			planStarted = true;
+			planEnded = false;
+		}
 		
-		bool success = stepPlan();
+		// stepPlan not executed when plan is ended ( && operator )
+		bool success = !planEnded && stepPlan();
 		
-		if(!success) endPlan();
+		if(!success)
+		{
+			endPlan();
+			planStarted = false;
+		}
 		
 		return success;
+	}
+	
+	bool planEnded;
+	public void Stop()
+	{
+		planEnded = true;
 	}
 	
 	void startPlan()
 	{
 		stack = GetExecutionStack();
 		p = stack.Pop();
-		planStarted = true;
 		p.StartPlan();
 	}
 	bool stepPlan()
@@ -132,7 +214,6 @@ public abstract class BDI_Plan
 	void endPlan()
 	{
 		p.EndPlan();
-		planStarted = false;
 		stack.Clear();
 		stack = null;
 		p = null;

@@ -31,10 +31,28 @@ public class Plan_MoveToPosition : UnitPlan
 		
 		return distanceToTarget < this.SuccessDistance;
 	}
-
+	
+	public override float ContributionHeuristic ()
+	{
+		return 0;
+	}
 	
 	public override void ExecuteStep ()
 	{
-		agent.SetGoal(GoalPosition);
+		Vector3 totalForce = Vector3.zero;
+		
+		BDI_Unit me = this.agent.unitBeliefs.Me;
+		
+		// goal vector component
+	 	totalForce += me.getGoalVector(me.transform.position, GoalPosition) * me.GoalForceStrength;
+		
+		// velocity
+		Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
+		velocity += totalForce / me.Mass * Time.fixedDeltaTime;
+		
+		// clamp to maximum speed
+		velocity = Vector3.ClampMagnitude(velocity, me.MovementSpeed);
+		
+		agent.unitBeliefs.OptimalVelocity = velocity;
 	}
 }

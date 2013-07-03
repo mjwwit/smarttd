@@ -19,10 +19,11 @@ public class UnitAgent : BDI_Agent
 		unitBeliefs.NewEnemies += HandleBeliefsNewEnemies;
 	}
 	
-	// ? todo: move this to beliefs, since we update what we believe to be the best path?
+	// todo: move hexmap to beliefs?
+	// todo: move this to beliefs as well, since we update what we believe to be the best path?
+	// on the other hand, it is the agent that updates his beliefs.. :P
 	protected virtual void HandleBeliefsNewEnemies (object sender, List<Tower> newEnemies)
 	{
-		// todo: move hexmap to beliefs?
 		foreach(Tower t in newEnemies)
 			unitBeliefs.Me.map.ModifyCellsInRange<Tower>(t, unitBeliefs.Me.GridMod_AddTower, t);
 		
@@ -38,13 +39,20 @@ public class UnitAgent : BDI_Agent
 		};
 	}
 	
+	protected override bool GoalsCompleted ()
+	{
+		return Attacker.DistanceToGoal(GetPosition()) < unitBeliefs.Me.PositionReachedMargin;
+	}
+	
+	public override void StopAgent ()
+	{
+		base.StopAgent ();
+		
+		unitBeliefs.OptimalVelocity = Vector3.zero;
+	}
+	
 	public Vector3 GetPosition()
 	{
 		return unitBeliefs.Me.transform.position;
-	}
-	
-	public void SetGoal(Vector3 position)
-	{
-		unitBeliefs.Me.GoalPosition = position;
 	}
 }

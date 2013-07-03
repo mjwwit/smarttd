@@ -89,4 +89,9 @@ public class UnitBeliefs : BDI_Beliefs
 	}
 	
 	#endregion
+	
+	public override string MyName ()
+	{
+		return Me.gameObject.name;
+	}
 }
