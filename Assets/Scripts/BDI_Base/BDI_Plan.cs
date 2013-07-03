@@ -52,6 +52,9 @@ public abstract class BDI_Plan
 	// If this condition is satisfied, we go to the next (sub)step in the plan.
 	public abstract bool SatisfiesSuccessCondition();
 	
+	public virtual void StartPlan() { }
+	public virtual void EndPlan() { }
+	
 	// execute the action that belongs to this plan
 	public abstract void ExecuteStep();
 	
@@ -96,6 +99,7 @@ public abstract class BDI_Plan
 		stack = GetExecutionStack();
 		p = stack.Pop();
 		planStarted = true;
+		p.StartPlan();
 	}
 	bool stepPlan()
 	{
@@ -127,6 +131,7 @@ public abstract class BDI_Plan
 	}
 	void endPlan()
 	{
+		p.EndPlan();
 		planStarted = false;
 		stack.Clear();
 		stack = null;

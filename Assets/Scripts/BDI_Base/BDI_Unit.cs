@@ -31,8 +31,10 @@ public class BDI_Unit : Unit
 		// update agent
 		Agent.Update();
 		
+		velocity = this.Agent.unitBeliefs.OptimalVelocity;
+		
 		// velocity
-		velocity = MovementSpeed * (GoalPosition - cPos).normalized;
+		//velocity = MovementSpeed * (GoalPosition - cPos).normalized;
 		
 		// move unit
 		transform.position += velocity * Time.fixedDeltaTime;

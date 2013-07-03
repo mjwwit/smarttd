@@ -33,6 +33,7 @@ public class UnitAgent : BDI_Agent
 	{
 		return new BDI_Plan[]
 		{
+			new Plan_FlockAndFollowPath(this),
 			new Plan_FollowOptimalPath(this),
 		};
 	}

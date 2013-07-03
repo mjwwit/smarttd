@@ -28,9 +28,8 @@ public class Plan_MoveToPosition : UnitPlan
 	public override bool SatisfiesSuccessCondition ()
 	{
 		float distanceToTarget = BasicObject.Distance(agent.GetPosition(), this.GoalPosition);
-		if( distanceToTarget < this.SuccessDistance )
-			return true;
-		else return false;
+		
+		return distanceToTarget < this.SuccessDistance;
 	}
 
 	

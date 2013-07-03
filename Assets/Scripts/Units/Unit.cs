@@ -82,7 +82,7 @@ public class Unit : BasicObject
 	 	totalForce += getGoalVector(cPos) * GoalForceStrength;
 		
 		// apply flocking force
-		totalForce += getFlockingVector(cPos) * FlockingStrength;
+		//totalForce += getFlockingVector(attackers, defenders, cPos) * FlockingStrength;
 		
 		// velocity
 		velocity += totalForce / Mass * Time.fixedDeltaTime;
@@ -99,45 +99,46 @@ public class Unit : BasicObject
 	
 	#region Flocking
 	
-	Vector3 getFlockingVector(Vector3 cPos)
+	public static Vector3 getFlockingVector(BDI_Unit me, List<BDI_Unit> friends, List<Tower> enemies)
 	{
+		Vector3 cPos = me.transform.position;
 		Vector3 v = Vector3.zero;
-		foreach(BasicObject a in attackers)
+		foreach(BasicObject a in friends)
 		{				
-			if(this == a) { continue; }
+			//if(this == a) { continue; }
 			
 			Vector3 vAdd = Vector3.zero;
 						
-			float dist = DistanceTo(a);
+			float dist = BasicObject.Distance(me, a);
 			Vector3 dir = (cPos - a.transform.position) / dist;
 			
 			// if we're not being targeted by an area effect, enable cohesion
 			bool targetedByAoE = false;
-			foreach(BasicObject b in defenders)
+			foreach(BasicObject b in enemies)
 			{
 				Tower_AoE t = b as Tower_AoE;
-				if(t && t.CurrentTarget == this) 
+				if(t && t.CurrentTarget == me) 
 					targetedByAoE = true;
 			}
-			if(!targetedByAoE && dist < CohesionDistance)
+			if(!targetedByAoE && dist < me.CohesionDistance)
 			{
-				vAdd += -CohesionStrength * dir;
+				vAdd += -me.CohesionStrength * dir;
 			}
 			
 			// for each object in range that's being targeted, add separation force
-			foreach(BasicObject b in defenders)
+			foreach(BasicObject b in enemies)
 			{
 				Tower_AoE t = b as Tower_AoE;
 				if(!t) continue;
 				
 				if(a == t.CurrentTarget && dist < t.AreaOfEffectRadius + 0.2f)
-					vAdd += SeparationStrength * dir;
+					vAdd += me.SeparationStrength * dir;
 			}
 			
 			// standard separation force
-			if(dist < SeparationDistance)
+			if(dist < me.SeparationDistance)
 			{
-				vAdd += SeparationStrength * dir;
+				vAdd += me.SeparationStrength * dir;
 			}
 			
 			//float baseInfluence = 0.5f;
@@ -202,7 +203,7 @@ public class Unit : BasicObject
 	// todo: move this part to beliefs
 	#region Grid-based path planning
 	
-	Vector3 getGoalVector(Vector3 cPos)
+	public Vector3 getGoalVector(Vector3 cPos)
 	{
 		// get goal position
 		// can be used as a hint for a forces based method

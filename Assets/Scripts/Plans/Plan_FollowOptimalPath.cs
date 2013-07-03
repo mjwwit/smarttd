@@ -14,19 +14,21 @@ public class Plan_FollowOptimalPath : UnitPlan
 	}
 	public override bool SatisfiesInvocationCondition ()
 	{
-		if(agent.unitBeliefs.FriendsInRange.Count <= 0)
-			return true;
-		return false;
+		return agent.unitBeliefs.FriendsInRange.Count <= 0;
 	}
 	public override bool SatisfiesTerminationCondition ()
 	{
 		return agent.unitBeliefs.FriendsInRange.Count > 0;
-		//return false;
 	}
 	public override bool SatisfiesSuccessCondition ()
 	{
 		return Attacker.DistanceToGoal(agent.GetPosition()) < 0.2f;
-		//return true;
+	}
+	
+	public override void StartPlan ()
+	{
+		// reset any existing optimal path
+		agent.me.path = null;
 	}
 	
 	public override void ExecuteStep ()
