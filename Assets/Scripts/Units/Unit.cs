@@ -99,11 +99,17 @@ public class Unit : BasicObject
 	
 	#region Flocking
 	
-	public static Vector3 getFlockingVector(BDI_Unit me, List<BDI_Unit> friends, List<Tower> enemies)
+	public static Vector3 getFlockingVector(
+		BDI_Unit me, 
+		List<BDI_Unit> cohesionFactors, 
+		float cohesionDistance,
+		List<BDI_Unit> separationFactors,
+		float separationDistance,
+		List<Tower> enemies)
 	{
 		Vector3 cPos = me.transform.position;
 		Vector3 v = Vector3.zero;
-		foreach(BasicObject a in friends)
+		foreach(BasicObject a in cohesionFactors)
 		{				
 			//if(this == a) { continue; }
 			
@@ -120,10 +126,21 @@ public class Unit : BasicObject
 				if(t && t.CurrentTarget == me) 
 					targetedByAoE = true;
 			}
-			if(!targetedByAoE && dist < me.CohesionDistance)
+			if(!targetedByAoE && dist < cohesionDistance) // && dist < me.CohesionDistance)
 			{
 				vAdd += -me.CohesionStrength * dir;
 			}
+			
+			v+= vAdd;
+		}
+		
+		foreach(BasicObject a in separationFactors)
+		{
+			
+			Vector3 vAdd = Vector3.zero;
+						
+			float dist = BasicObject.Distance(me, a);
+			Vector3 dir = (cPos - a.transform.position) / dist;
 			
 			// for each object in range that's being targeted, add separation force
 			foreach(BasicObject b in enemies)
@@ -136,7 +153,7 @@ public class Unit : BasicObject
 			}
 			
 			// standard separation force
-			if(dist < me.SeparationDistance)
+			if(dist < separationDistance) // dist < me.SeparationDistance)
 			{
 				vAdd += me.SeparationStrength * dir;
 			}

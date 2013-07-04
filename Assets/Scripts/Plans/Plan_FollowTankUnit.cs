@@ -3,41 +3,41 @@ using System.Collections.Generic;
 
 public class Plan_FollowTankUnit : UnitPlan 
 {
-	BDI_Unit tank;
+	TankUnit tank;
 	public Plan_FollowTankUnit(UnitAgent agent) : base(agent)
 	{
 		Type |= PlanType.Movement;
 		tank = null;
 	}
 	
-	public override bool SatisfiesPreCondition ()//Not targetted currently
+	public override bool SatisfiesPreCondition ()//Not targeted currently
 	{
 		for(int i=0;i<agent.unitBeliefs.EnemiesInRange.Count;i++) 
 		{
-			if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget.Equals(agent.me))
+			// .equals doesn't work when currenttarget is null
+			//if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget.Equals(agent.me))
+			if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget == agent.me)
 				return false;
 		}		
 		return true;
 	}
 	public override bool SatisfiesInvocationCondition ()//Tank in range
 	{
-		if(agent.me.HP>5)
-			return false;
 		for(int i=0;i<agent.unitBeliefs.FriendsInRange.Count;i++) 
 		{
-			if (agent.unitBeliefs.FriendsInRange[i].HP>5)
+			tank = agent.unitBeliefs.FriendsInRange[i] as TankUnit;
+			if (tank)
 			{
-				tank=agent.unitBeliefs.FriendsInRange[i];
 				return true;
 			}
 		}		
 		return false;
 	}
-	public override bool SatisfiesTerminationCondition ()//Terminate when targetted or when tank dies
+	public override bool SatisfiesTerminationCondition ()//Terminate when targeted or when tank dies
 	{
 		for(int i=0;i<agent.unitBeliefs.EnemiesInRange.Count;i++) 
 		{
-			if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget.Equals(agent.me))
+			if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget == agent.me)
 				return true;
 		}	
 		return !(tank.IsAlive);
@@ -71,20 +71,25 @@ public class Plan_FollowTankUnit : UnitPlan
 		List<BDI_Unit> tankcontainer= new List<BDI_Unit>();
 		tankcontainer.Add (tank);
 		totalForce += Unit.getFlockingVector(
-				agent.unitBeliefs.Me, 
-				tankcontainer,
+				agent.unitBeliefs.Me,
+				tankcontainer, me.RangeOfView,
+				agent.unitBeliefs.FriendsInRange, me.SeparationDistance,
 				agent.unitBeliefs.EnemiesInRange) 
 			* me.FlockingStrength;		
 		
 		// velocity
 		//Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
-		Vector3 velocity = totalForce / me.Mass * Time.fixedDeltaTime;
+		Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
+		velocity += totalForce / me.Mass * Time.fixedDeltaTime;
 		
 		// clamp to maximum speed
 		velocity = Vector3.ClampMagnitude(velocity, me.MovementSpeed);
 		
-		if(Attacker.DistanceToGoal(me.Agent.GetPosition())>Attacker.DistanceToGoal(tank.Agent.GetPosition()))
-			velocity=Vector3.zero;
+		// we don't have to wait for the tank, since we're always chasing after the tank anyway
+		// waiting could even get us killed, we better just move to him a.s.a.p.!
+		
+		//if(Attacker.DistanceToGoal(me.Agent.GetPosition())>Attacker.DistanceToGoal(tank.Agent.GetPosition()))
+			//velocity=Vector3.zero;
 		
 		agent.unitBeliefs.OptimalVelocity = velocity;
 	}

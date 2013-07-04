@@ -179,15 +179,14 @@ public class HexMap : MonoBehaviour
 	public Node GetNode(float x, float z)
 	{
 		NodeIndex i = GetNodeIndex(x, z);
-		return nodes[i.X][i.Y];
+		return GetNode(i.X, i.Y);
 	}
 	public Node GetNode(int X, int Y)
 	{
-		if(    X < 0
-			|| X >= d.NodeCountX
-			|| Y < 0
-			|| Y >= d.NodeCountY)
-			return null;
+		if(X >= d.NodeCountX) X = d.NodeCountX-1;
+		else if(X < 0) X = 0;
+		if(Y >= d.NodeCountY) Y = d.NodeCountY-1;
+		else if(Y < 0) Y = 0;
 		
 		return nodes[X][Y];
 	}

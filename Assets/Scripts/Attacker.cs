@@ -37,8 +37,6 @@ public struct Line
 
 public static class Attacker
 {
-	//public static Vector3 GoalDirection = Vector3.Normalize(new Vector3(1, 0, 0));
-	
 	public static Line Goal = new Line(
 		new Vector3(22.0f, 0.0f, -2),
 		new Vector3(22.0f, 0.0f, 2)
@@ -47,12 +45,14 @@ public static class Attacker
 	public static List<BasicObject> Objects;
 	public static List<Unit> Units;
 	public static List<ShieldUnit> ShieldUnits;
+	public static List<TankUnit> TankUnits;
 	
 	public static void Awake ()
 	{
 		Objects = new List<BasicObject>( (Unit[])GameObject.FindObjectsOfType(typeof(Unit)) );
 		Units = new List<Unit>( (Unit[])GameObject.FindObjectsOfType(typeof(Unit)) );
 		ShieldUnits = new List<ShieldUnit>( (ShieldUnit[])GameObject.FindObjectsOfType(typeof(ShieldUnit)) );
+		TankUnits = new List<TankUnit>( (TankUnit[])GameObject.FindObjectsOfType(typeof(TankUnit)) );
 	}
 	
 	public static void AddObject(BasicObject obj)
@@ -64,6 +64,9 @@ public static class Attacker
 		
 		ShieldUnit su = obj as ShieldUnit;
 		if(su) ShieldUnits.Add( su );
+		
+		TankUnit tu = obj as TankUnit;
+		if(tu) TankUnits.Add( tu );
 	}
 	
 	public static void RemoveObject(BasicObject obj)
@@ -75,6 +78,9 @@ public static class Attacker
 		
 		ShieldUnit su = obj as ShieldUnit;
 		if(su) ShieldUnits.Remove( su );
+		
+		TankUnit tu = obj as TankUnit;
+		if(tu) TankUnits.Remove( tu );
 	}
 	
 	// Check to see how close we are to the goal.

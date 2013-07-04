@@ -50,8 +50,9 @@ public class Plan_FlockAndFollowPath : UnitPlan
 		
 		// apply flocking force
 		totalForce += Unit.getFlockingVector(
-				agent.unitBeliefs.Me, 
-				agent.unitBeliefs.FriendsInRange, 
+				agent.unitBeliefs.Me,
+				agent.unitBeliefs.FriendsInRange, me.RangeOfView,
+				agent.unitBeliefs.FriendsInRange, me.SeparationDistance,
 				agent.unitBeliefs.EnemiesInRange) 
 			* me.FlockingStrength;
 		
