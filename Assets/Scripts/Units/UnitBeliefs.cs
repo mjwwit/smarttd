@@ -9,6 +9,7 @@ public class UnitBeliefs : BDI_Beliefs
 	public List<BDI_Unit> FriendsInRange;
 	public List<Tower> Enemies;
 	public List<Tower> EnemiesInRange;
+	public int TargetedBy = 0;
 	
 	public Vector3 OptimalVelocity;
 	
@@ -52,7 +53,9 @@ public class UnitBeliefs : BDI_Beliefs
 			Me.transform.position, Me.RangeOfView, Defender.Objects );
 		
 		// add new enemies to collection
+		// set by how many turrets we're targeted
 		List<Tower> newEnemies = new List<Tower>();
+		TargetedBy = 0;
 		foreach(Tower t in EnemiesInRange)
 		{
 			if(!Enemies.Contains(t))
@@ -60,6 +63,8 @@ public class UnitBeliefs : BDI_Beliefs
 				Enemies.Add(t);
 				newEnemies.Add(t);
 			}
+			if(t.CurrentTarget == Me)
+				TargetedBy++;
 		}
 		if(newEnemies.Count > 0)
 			OnNewEnemies(newEnemies);

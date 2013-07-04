@@ -12,13 +12,7 @@ public class Plan_FollowTankUnit : UnitPlan
 	
 	public override bool SatisfiesPreCondition ()//Not targeted currently
 	{
-		for(int i=0;i<agent.unitBeliefs.EnemiesInRange.Count;i++) 
-		{
-			// .equals doesn't work when currenttarget is null
-			//if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget.Equals(agent.me))
-			if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget == agent.me)
-				return false;
-		}		
+		if(agent.unitBeliefs.TargetedBy > 0) return false;
 		return true;
 	}
 	public override bool SatisfiesInvocationCondition ()//Tank in range
@@ -33,14 +27,15 @@ public class Plan_FollowTankUnit : UnitPlan
 		}		
 		return false;
 	}
-	public override bool SatisfiesTerminationCondition ()//Terminate when targeted or when tank dies
+	// Terminate when:
+	// - targeted;
+	// - tank dies;
+	// - tank is out of view range.
+	public override bool SatisfiesTerminationCondition ()
 	{
-		for(int i=0;i<agent.unitBeliefs.EnemiesInRange.Count;i++) 
-		{
-			if (agent.unitBeliefs.EnemiesInRange[i].CurrentTarget == agent.me)
-				return true;
-		}	
-		return !(tank.IsAlive);
+		if(agent.unitBeliefs.TargetedBy > 0) return true;
+		return !tank || !(tank.IsAlive) 
+			|| agent.unitBeliefs.Me.IsInRange(tank) < 0;
 	}
 	public override bool SatisfiesSuccessCondition ()
 	{

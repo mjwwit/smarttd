@@ -23,8 +23,6 @@ public class BDI_Unit : Unit
 		// todo: replace this with base.FixedUpdate() when merging with Unit.cs
 		updateBuffs(Time.fixedDeltaTime);
 		
-		Vector3 cPos = transform.position;
-		
 		// update agent
 		Agent.Update();
 		

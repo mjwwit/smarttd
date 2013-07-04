@@ -12,6 +12,7 @@ public class Plan_FlockAndFollowPath : UnitPlan
 	
 	public override bool SatisfiesPreCondition ()
 	{
+		if(agent.unitBeliefs.TargetedBy > 0) return false;
 		return true;
 	}
 	public override bool SatisfiesInvocationCondition ()
@@ -20,6 +21,7 @@ public class Plan_FlockAndFollowPath : UnitPlan
 	}
 	public override bool SatisfiesTerminationCondition ()
 	{
+		if(agent.unitBeliefs.TargetedBy > 0) return true;
 		return agent.unitBeliefs.FriendsInRange.Count <= 0;
 	}
 	public override bool SatisfiesSuccessCondition ()
