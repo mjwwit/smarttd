@@ -1,40 +1,18 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Path Planning\HexMap.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Plans\Plan_MoveToPosition.cs">
     <Files>
-<<<<<<< HEAD
-      <File FileName="Assets\Scripts\Units\Unit.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Tower.cs" Line="7" Column="2" />
-      <File FileName="Assets\Scripts\Path Planning\HexMap.cs" Line="27" Column="48" />
-=======
-      <File FileName="Assets\Scripts\Path Planning\HexMap.cs" Line="63" Column="5" />
-      <File FileName="Assets\Scripts\Visualizer.cs" Line="21" Column="19" />
-      <File FileName="Assets\Scripts\Attacker.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Units\Unit.cs" Line="33" Column="2" />
-      <File FileName="Assets\Scripts\Tower.cs" Line="16" Column="3" />
-      <File FileName="Assets\Scripts\BasicObject.cs" Line="292" Column="38" />
-      <File FileName="Assets\Scripts\ScriptInitializer.cs" Line="12" Column="3" />
->>>>>>> origin/master
+      <File FileName="Assets\Scripts\BDI_Base\BDI_Plan.cs" Line="124" Column="2" />
+      <File FileName="Assets\Scripts\Plans\UnitPlan.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Plans\Plan_FollowOptimalPath.cs" Line="44" Column="27" />
+      <File FileName="Assets\Scripts\Plans\Plan_FlockAndFollowPath.cs" Line="19" Column="3" />
+      <File FileName="Assets\Scripts\Plans\Plan_MoveToPosition.cs" Line="44" Column="43" />
+      <File FileName="Assets\Scripts\BDI_Base\BDI_Beliefs.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\BDI_Base\BDI_Agent.cs" Line="100" Column="7" />
+      <File FileName="Assets\Scripts\Path Planning\HexMap.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Path Planning\Node.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Units\Unit.cs" Line="85" Column="33" />
     </Files>
-    <Pads>
-      <Pad Id="ProjectPad">
-        <State expanded="True">
-          <Node name="Assembly-CSharp" expanded="True">
-            <Node name="Assets" expanded="True">
-              <Node name="Scripts" expanded="True">
-                <Node name="Path Planning" expanded="True">
-                  <Node name="HexMap.cs" selected="True" />
-                </Node>
-<<<<<<< HEAD
-=======
-                <Node name="Units" expanded="True" />
->>>>>>> origin/master
-              </Node>
-            </Node>
-          </Node>
-        </State>
-      </Pad>
-    </Pads>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
