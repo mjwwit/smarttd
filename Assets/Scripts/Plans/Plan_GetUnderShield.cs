@@ -42,9 +42,12 @@ public class Plan_GetUnderShield : UnitPlan
 	}
 	
 	// heuristic: how many units will survive when we use this plan, including ourselves?
+	// it's a pretty bad heuristic, we need something better 
+	// something like an estimation of:
+	// 		the total cost of all nodes we pass through divided by the chance we'll be damaged
 	public override float ContributionHeuristic ()
 	{
-		return 100;//for testing
+		return 101;//for testing
 	}
 	
 	protected override void StartPlan ()

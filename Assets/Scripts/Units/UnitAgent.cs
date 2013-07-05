@@ -32,6 +32,31 @@ public class UnitAgent : BDI_Agent
 	
 	protected override BDI_Plan[] GetAvailablePlans ()
 	{
+		List<BDI_Plan> plans = new List<BDI_Plan>();
+		foreach(Plan p in me.AvailablePlans)
+		{
+			switch(p)
+			{
+			case Plan.FollowOptimalPath:
+				plans.Add(new Plan_FollowOptimalPath(this));
+				break;
+			case Plan.FlockAndFollowPath:
+				plans.Add(new Plan_FlockAndFollowPath(this));
+				break;
+			case Plan.FollowTankUnit:
+				plans.Add(new Plan_FollowTankUnit(this));
+				break;
+			case Plan.GetUnderShield:
+				plans.Add(new Plan_GetUnderShield(this));
+				break;
+			case Plan.MoveToGoalPosition:
+				plans.Add(new Plan_MoveToGoalPosition(this));
+				break;
+			}
+		}
+		return plans.ToArray();
+		
+		/* Old plan definition.
 		return new BDI_Plan[]
 		{
 			new Plan_FlockAndFollowPath(this),
@@ -39,6 +64,7 @@ public class UnitAgent : BDI_Agent
 			new Plan_FollowTankUnit(this),
 			new Plan_GetUnderShield(this)
 		};
+		*/
 	}
 	
 	protected override bool GoalsCompleted ()

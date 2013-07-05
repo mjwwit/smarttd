@@ -2,9 +2,24 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+// enumeration of all plan types used for selecting plans in the editor	
+public enum Plan
+{
+	FlockAndFollowPath,
+	FollowOptimalPath,
+	FollowTankUnit,
+	GetUnderShield,
+	MoveToGoalPosition,
+}
+
+// class on top of Unit, enabling use of the BDI agent
 public class BDI_Unit : Unit
 {
 	public UnitAgent Agent;
+	public List<Plan> AvailablePlans = new List<Plan>()
+	{
+		Plan.FollowOptimalPath
+	};
 	
 	protected override void Start ()
 	{
@@ -28,12 +43,7 @@ public class BDI_Unit : Unit
 		
 		velocity = this.Agent.unitBeliefs.OptimalVelocity;
 		
-		// velocity
-		//velocity = MovementSpeed * (GoalPosition - cPos).normalized;
-		
 		// move unit
 		transform.position += velocity * Time.fixedDeltaTime;
-		
-		//transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.fixedDeltaTime);
 	}
 }

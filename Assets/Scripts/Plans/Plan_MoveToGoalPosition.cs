@@ -1,15 +1,13 @@
 using UnityEngine;
 using System.Collections;
 
-public class Plan_MoveToPosition : UnitPlan 
+public class Plan_MoveToGoalPosition : UnitPlan 
 {
 	public Vector3 GoalPosition;
-	public float SuccessDistance;
 	
-	public Plan_MoveToPosition(UnitAgent agent, Vector3 position, float successDistance) : base(agent)
+	public Plan_MoveToGoalPosition(UnitAgent agent) : base(agent)
 	{
-		this.GoalPosition = position;
-		this.SuccessDistance = successDistance;
+		
 	}
 	
 	public override bool SatisfiesPreCondition ()
@@ -29,12 +27,17 @@ public class Plan_MoveToPosition : UnitPlan
 	{
 		float distanceToTarget = BasicObject.Distance(agent.GetPosition(), this.GoalPosition);
 		
-		return distanceToTarget < this.SuccessDistance;
+		return distanceToTarget < agent.me.PositionReachedMargin;
 	}
 	
 	public override float ContributionHeuristic ()
 	{
 		return 0;
+	}
+	
+	protected override void StartPlan ()
+	{
+		this.GoalPosition = Attacker.ClosestPointOnGoal(agent.GetPosition());
 	}
 	
 	public override void ExecuteStep ()
@@ -43,11 +46,22 @@ public class Plan_MoveToPosition : UnitPlan
 		
 		BDI_Unit me = this.agent.unitBeliefs.Me;
 		
+		Vector3 myPos = me.transform.position;
+		Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
+		
+		Vector3 diff = Attacker.VectorToGoal(myPos);
+		float distance = diff.magnitude;
+		
+		// normalize to direction
+		diff /= distance > 0 ? distance : 1;
+		
+		Vector3 goalDesiredVelocity = diff * me.MovementSpeed;
+		Vector3 goalForce = goalDesiredVelocity - velocity;
+		
 		// goal vector component
-	 	totalForce += me.getGoalVector(me.transform.position, GoalPosition) * me.GoalForceStrength;
+	 	totalForce += goalForce * me.GoalForceStrength;
 		
 		// velocity
-		Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
 		velocity += totalForce / me.Mass * Time.fixedDeltaTime;
 		
 		// clamp to maximum speed

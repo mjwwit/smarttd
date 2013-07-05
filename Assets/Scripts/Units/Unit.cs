@@ -5,10 +5,10 @@ using System.Collections.Generic;
 public class Unit : BasicObject
 {
 	// temporary lists, cached every frame (we need it so often)
-	List<BasicObject> attackers;
-	List<BasicObject> defenders;
+	//List<BasicObject> attackers;
+	//List<BasicObject> defenders;
 	
-	List<BasicObject> knownDefenders;
+	//List<BasicObject> knownDefenders;
 	
 	// todo: move hexmap to beliefs
 	// grid-based pathfinding variables
@@ -25,6 +25,7 @@ public class Unit : BasicObject
 	
 	// influences how easily the object changes to new directions
 	// lower mass makes for an easier change in velocity
+	// used to smooth movement a bit
 	public float Mass = 1;
 	
 	// force parameters
@@ -36,8 +37,6 @@ public class Unit : BasicObject
 	public float CohesionDistance = 5.0f;
 	public float CohesionStrength = 1.0f;
 	
-	public float AlignmentStrength;
-	
 	protected override void Start ()
 	{
 		base.Start ();
@@ -45,20 +44,15 @@ public class Unit : BasicObject
 		map = GetComponent<HexMap>();
 		cPathNode = 0;
 		
-		knownDefenders = new List<BasicObject>();
+		//knownDefenders = new List<BasicObject>();
 		
 		velocity = Vector3.zero;
 		totalForce = Vector3.zero;
 	}
 	
-	protected override void Update ()
-	{
-		base.Update ();
-
-	}
-	
 	protected override void FixedUpdate ()
 	{
+		/*
 		base.FixedUpdate();
 		
 		Vector3 cPos = transform.position;
@@ -95,6 +89,7 @@ public class Unit : BasicObject
 		transform.position += velocity * Time.fixedDeltaTime;
 		
 		//transform.position += diff * Mathf.Min(distance, MovementSpeed * Time.fixedDeltaTime);
+		*/
 	}
 	
 	#region Flocking
@@ -171,9 +166,9 @@ public class Unit : BasicObject
 	
 	#endregion
 	
-	// todo: move this to belief updating
 	#region New Data Handling
 	
+	/*
 	void handleNewData()
 	{
 		bool resetPath = false;
@@ -196,17 +191,20 @@ public class Unit : BasicObject
 		// reset path if needed
 		if(resetPath) path = null;
 	}
+	*/
 	
 	/* --- Functions handling newly aqcuired information. ---
 	 * These functions should return TRUE if the new data was relevant to this object (ie. for path planning).
 	*/
 	
+	/*
 	// handles new tower information
 	bool handleNewData(Tower t)
 	{
 		map.ModifyCellsInRange<Tower>(t, GridMod_AddTower, t);
 		return true;
 	}
+	*/
 	
 	// This function adds a tower's influence to the unit's hexmap data.
 	// Here we can scale it by how much the unit is affected by this particular turret, etcetera.
@@ -217,7 +215,6 @@ public class Unit : BasicObject
 	
 	#endregion
 	
-	// todo: move this part to beliefs
 	#region Grid-based path planning
 	
 	public Vector3 getGoalVector(Vector3 fromPos, Vector3 toPos)

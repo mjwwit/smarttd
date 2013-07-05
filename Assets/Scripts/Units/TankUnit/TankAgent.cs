@@ -18,14 +18,4 @@ public class TankUnitAgent : UnitAgent
 		
 		unitBeliefs.NewEnemies += HandleBeliefsNewEnemies;
 	}
-	
-	// the only way an agent differs from other agents is by its beliefs and available plans
-	// todo: define more plans for the shield unit
-	protected override BDI_Plan[] GetAvailablePlans ()
-	{
-		return new BDI_Plan[]
-		{
-			new Plan_FollowOptimalPath(this),
-		};
-	}
 }

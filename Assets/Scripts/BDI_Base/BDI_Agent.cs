@@ -79,7 +79,7 @@ public abstract class BDI_Agent
 	
 	public BDI_Agent()
 	{
-		PossiblePlans = new List<BDI_Plan>(GetAvailablePlans());
+		PossiblePlans = null;
 		ConsideredPlans = new List<BDI_Plan>();
 		CommittedPlans = new List<BDI_Plan>();
 	}
@@ -97,6 +97,9 @@ public abstract class BDI_Agent
 	// currently every frame, but using a coroutine this can easily be changed to some time interval
 	public virtual void Update()
 	{
+		if(PossiblePlans == null) 
+			PossiblePlans = new List<BDI_Plan>(GetAvailablePlans());
+		
 		// option generator
 		// read event queue ( or current status ) and return a list of options
 		// ----->

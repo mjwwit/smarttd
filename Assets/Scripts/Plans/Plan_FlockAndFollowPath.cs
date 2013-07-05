@@ -12,15 +12,24 @@ public class Plan_FlockAndFollowPath : UnitPlan
 	
 	public override bool SatisfiesPreCondition ()
 	{
+		 // for experiment purposes when this is the only plan available
+		if(agent.me.AvailablePlans.Count == 1) return true;
+		
 		if(agent.unitBeliefs.TargetedBy > 0) return false;
 		return true;
 	}
 	public override bool SatisfiesInvocationCondition ()
 	{
+		 // for experiment purposes when this is the only plan available
+		if(agent.me.AvailablePlans.Count == 1) return true;
+		
 		return agent.unitBeliefs.FriendsInRange.Count > 0;
 	}
 	public override bool SatisfiesTerminationCondition ()
 	{
+		 // for experiment purposes when this is the only plan available
+		if(agent.me.AvailablePlans.Count == 1) return false;
+		
 		if(agent.unitBeliefs.TargetedBy > 0) return true;
 		return agent.unitBeliefs.FriendsInRange.Count <= 0;
 	}
