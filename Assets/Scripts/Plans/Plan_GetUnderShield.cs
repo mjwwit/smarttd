@@ -22,7 +22,7 @@ public class Plan_GetUnderShield : UnitPlan
 			shield = agent.unitBeliefs.FriendsInRange[i] as ShieldUnit;
 			if (shield)
 			{
-				return shield.DistanceTo(agent.me)>3;
+				return true;
 			}
 		}		
 		return false;
@@ -33,7 +33,6 @@ public class Plan_GetUnderShield : UnitPlan
 	// - shield is out of view range.
 	public override bool SatisfiesTerminationCondition ()
 	{
-		if(shield.DistanceTo(agent.me)<3) return true;
 		return !shield || !(shield.IsAlive) 
 			|| agent.unitBeliefs.Me.IsInRange(shield) < 0;
 	}
@@ -60,23 +59,25 @@ public class Plan_GetUnderShield : UnitPlan
 		
 		BDI_Unit me = this.agent.unitBeliefs.Me;
 		
-		// goal vector component
-	 	//totalForce += me.getGoalVector(me.transform.position, me.GetGridGoal()) * me.GoalForceStrength;
-		
-		List<BDI_Unit> shieldcontainer= new List<BDI_Unit>();
-		shieldcontainer.Add (shield);
-		totalForce += Unit.getFlockingVector(
+		//if we are far, we move towards shield, if we are close we follow optimal path.
+		if(me.DistanceTo(shield)>shield.ShieldRange)
+		{
+			List<BDI_Unit> shieldcontainer= new List<BDI_Unit>();
+			shieldcontainer.Add (shield);
+			totalForce += Unit.getFlockingVector(
 				agent.unitBeliefs.Me,
 				shieldcontainer, me.RangeOfView,
 				agent.unitBeliefs.FriendsInRange, me.SeparationDistance,
 				agent.unitBeliefs.EnemiesInRange) 
 			* me.FlockingStrength;		
+		}
+		else
+		{
+			totalForce += me.getGoalVector(me.transform.position, me.GetGridGoal()) * me.GoalForceStrength;
+		}
 		
-		// velocity
-		//Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
 		Vector3 velocity = agent.unitBeliefs.OptimalVelocity;
 		velocity += totalForce / me.Mass * Time.fixedDeltaTime;
-		
 		// clamp to maximum speed
 		velocity = Vector3.ClampMagnitude(velocity, me.MovementSpeed);
 		
