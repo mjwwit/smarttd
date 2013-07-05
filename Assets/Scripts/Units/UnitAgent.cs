@@ -36,7 +36,8 @@ public class UnitAgent : BDI_Agent
 		{
 			new Plan_FlockAndFollowPath(this),
 			new Plan_FollowOptimalPath(this),
-			new Plan_FollowTankUnit(this)
+			new Plan_FollowTankUnit(this),
+			new Plan_GetUnderShield(this)
 		};
 	}
 	
